@@ -12,6 +12,8 @@ frontend-dependencies: \
 	cd ${prefix}/frontend && pnpm install --frozen-lockfile
 
 frontend-builder:
+	rsync -rz ../frontend/ -f '- package.json' -f '- pnpm-lock.yaml' ${prefix}/frontend/
+	cd ${prefix}/frontend && pnpm build
 
 ${prefix}/frontend/package.json:
 	@mkdir -p ${prefix}/frontend/
