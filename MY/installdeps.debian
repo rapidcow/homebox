@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+declare -a deps
+if [[ $EUID != 0 ]]; then
+    echo "You need root privilege to run install system dependencies." >&2
+    exit 1
+fi
+
+####### Debian package enumeration #############
+# Alpine 'libwebp' = Debian 'libwebp-dev'
+# https://packages.debian.org/bullseye/libwebp-dev
+deps+=(libwebp-dev)
+# Alpine 'libavif' = Debian 'libavif-dev' ?
+# https://packages.debian.org/sid/libavif-dev
+deps+=(libavif-dev)
+# Alpine 'libheif' = Debian 'libheif-dev'
+# https://packages.debian.org/bullseye/libheif-dev
+# See also? libheif1, libde265-0, ...
+# https://www.reddit.com/r/debian/comments/j0nyud/how_to_install_libheif/
+deps+=(libheif-dev)
+# Alpine 'libjxl' = Debian 'libjxl-dev'
+# https://packages.debian.org/libjxl-dev
+deps+=(libjxl-dev)
+
+echo "The following will be installed:"
+declare -p deps
+set -x
+# If we don't want interactive confirmation, pass -y
+exec apt-get install "$@" "${deps[@]}"
