@@ -1,0 +1,14 @@
+= installation
+
+./configure.sh && make && ./deploy.sh
+
+If at any step a command fails, investigate and try again.
+
+configure doesn't actually configure anything; it
+just whines if you don't have something installed.
+maybe it should generate the Makefile's build
+date/versions if i get to it later, i don't know.
+
+To uninstall i imagine something like this will do:
+
+git clean -fx ; rm -rf /usr/local/opt/homebox*
