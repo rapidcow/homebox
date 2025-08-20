@@ -5,6 +5,11 @@ if [[ $EUID != 0 ]]; then
     exit 1
 fi
 
+# git, gcc, g++ are just themselves (I think)
+deps+=(git gcc g++)
+# Alpina 'build-base' = Debian 'build-essential'
+deps+=(build-essential)
+
 ####### Debian package enumeration #############
 # Alpine 'libwebp' = Debian 'libwebp-dev'
 # https://packages.debian.org/bullseye/libwebp-dev
