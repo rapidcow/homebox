@@ -1,10 +1,12 @@
 .PHONY: install frontend-dependencies frontend-builder
+.PHONY: builder-dependencies
 
 prefix = /usr/local/opt/homebox
 
 install: \
 	frontend-dependencies \
-	frontend-builder
+	frontend-builder \
+	builder-dependencies
 
 frontend-dependencies: \
 	${prefix}/frontend/package.json \
@@ -22,5 +24,18 @@ ${prefix}/frontend/package.json:
 ${prefix}/frontend/pnpm-lock.yaml:
 	@mkdir -p ${prefix}/frontend/
 	cp ../frontend/pnpm-lock.yaml ${prefix}/frontend/
+
+builder-dependencies: \
+	${prefix}/backend/go.mod \
+	${prefix}/backend/go.sum
+	cd ${prefix}/backend && go mod download
+
+${prefix}/backend/go.mod:
+	@mkdir -p ${prefix}/backend/
+	cp ../backend/go.mod ${prefix}/backend/
+
+${prefix}/backend/go.sum:
+	@mkdir -p ${prefix}/backend/
+	cp ../backend/go.sum ${prefix}/backend/
 
 # vim: set noet ts=8 sw=8 sts=8 :
