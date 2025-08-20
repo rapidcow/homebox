@@ -19,7 +19,7 @@ install:
 	install -m 755 -d ${prefix}/opt/homebox/bin
 	install -m 755 build/backend/bin/api ${prefix}/opt/homebox/bin/api
 	@# install static/public/
-	install -m 755 ${prefix}/opt/homebox/static
+	install -m 755 -d ${prefix}/opt/homebox/static
 	rsync -rz --delete build/frontend/.output/public ${prefix}/opt/homebox/static/
 
 frontend-dependencies: \
