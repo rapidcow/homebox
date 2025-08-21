@@ -59,9 +59,9 @@ backend-builder:
 	build_time="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
 	version="$$(git describe --tags HEAD)"; \
 	cd build/backend && CGO_ENABLED=0 go build -ldflags "-s -w \
-		-X main.commit='$$commit' \
-		-X main.buildTime='$$build_time' \
-		-X main.version='$$version' \
+		-X main.commit=$$commit \
+		-X main.buildTime=$$build_time \
+		-X main.version=$$version \
 	" -o bin/api -v app/api/*.go
 	chmod +x build/backend/bin/api
 
