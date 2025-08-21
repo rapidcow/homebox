@@ -7,6 +7,9 @@ ExecStart=/usr/local/opt/homebox/bin/api
 WorkingDirectory=/usr/local/opt/homebox
 EnvironmentFile=/usr/local/etc/homebox/homebox.env
 User=www-data
+# Give us ownership to /run/homebox
+RuntimeDirectory=homebox
+ReadWritePaths=/run/homebox
 
 [Install]
-WantedBy=multi.user-target
+WantedBy=multi-user.target
