@@ -7,9 +7,9 @@ build_time="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 version="$(git describe --tags HEAD)"
 
 if git diff-index --exit-code --quiet HEAD --; then
-	dirty="-dirty"
-else
 	dirty=""
+else
+	dirty="-dirty"
 fi
 
 # It is a real release if tagged (we don't tag.... yet :)
@@ -25,6 +25,6 @@ cd build/backend
 CGO_ENABLED=0 go build -ldflags "-s -w
 	-X main.commit=$commit_short
 	-X main.buildTime=$build_time
-	-X main.version=$version-$dirty
+	-X main.version=$version$dirty
 	-X main.gitwebUrl=$gitweb_url
 " -o bin/api -v app/api/*.go
