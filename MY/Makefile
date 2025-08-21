@@ -18,9 +18,6 @@ install:
 	@# install bin/api
 	install -m 755 -d ${prefix}/bin
 	install -m 755 build/backend/bin/api ${prefix}/bin/api
-	@# install static/public/
-	install -m 755 -d ${prefix}/static
-	rsync -rz --delete build/frontend/.output/public ${prefix}/static/
 
 frontend-dependencies: \
 	build/frontend/package.json \
@@ -56,6 +53,8 @@ backend-builder:
 	@echo "Note: install system dependencies using ./installdeps.<DISTRO>!" >&2
 	@echo "Note: This Makefile will not guess your package manager." >&2
 	rsync -rz ../backend/ -f '- go.mod' -f '- go.sum' build/backend/
+	@# For Go embed.FS to see (it hates symlinks so we have to copy fr)
+	rsync -rz --delete build/frontend/.output/public/ build/backend/app/api/static/public
 	commit="$$(git rev-parse HEAD)"; \
 	build_time="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
 	version="$$(git describe --tags HEAD)"; \
