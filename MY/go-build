@@ -14,9 +14,9 @@ fi
 
 # It is a real release if tagged (we don't tag.... yet :)
 if git rev-parse --verify --quiet refs/tags/"$version" >/dev/null; then
-	gitweb_url="https://github.com/sysadminsmedia/homebox/releases/tag/$version"
-else
 	gitweb_url="https://github.com/rapidcow/homebox/tree/$commit"
+else
+	gitweb_url="https://github.com/sysadminsmedia/homebox/releases/tag/$version"
 fi
 
 
