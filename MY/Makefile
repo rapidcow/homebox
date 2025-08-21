@@ -55,14 +55,7 @@ backend-builder:
 	rsync -rz ../backend/ -f '- go.mod' -f '- go.sum' build/backend/
 	@# For Go embed.FS to see (it hates symlinks so we have to copy fr)
 	rsync -rz --delete build/frontend/.output/public/ build/backend/app/api/static/public
-	commit="$$(git rev-parse HEAD)"; \
-	build_time="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
-	version="$$(git describe --tags HEAD)"; \
-	cd build/backend && CGO_ENABLED=0 go build -ldflags "-s -w \
-		-X main.commit=$$commit \
-		-X main.buildTime=$$build_time \
-		-X main.version=$$version \
-	" -o bin/api -v app/api/*.go
+	./go-build
 	chmod +x build/backend/bin/api
 
 # vim: set noet ts=8 sw=8 sts=8 ft=make :
