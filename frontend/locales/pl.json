@@ -2,18 +2,18 @@
     "components": {
         "app": {
             "create_modal": {
-                "createAndAddAnother": "",
-                "enter": "",
-                "shift": ""
+                "createAndAddAnother": "Użyj {shiftKey} + {enterKey}, aby utworzyć i dodać kolejny.",
+                "enter": "Enter",
+                "shift": "Shift"
             },
             "import_dialog": {
                 "change_warning": "Zachowanie podczas importu z istniejącymi import_ref zostało zmienione. Jeśli import_ref jest obecny w pliku CSV, \nprzedmiot zostanie zaktualizowany wartościami z pliku CSV.",
                 "description": "Zaimportuj plik CSV zawierający Twoje przedmioty, etykiety i lokalizacje. Zobacz dokumentację, aby uzyskać \nwięcej informacji na temat wymaganego formatu.",
                 "title": "Zaimportuj plik CSV",
                 "toast": {
-                    "import_failed": "",
-                    "import_success": "",
-                    "please_select_file": ""
+                    "import_failed": "Import zakończony niepowodzeniem. Spróbuj ponownie później.",
+                    "import_success": "Import zakończony sukcesem!",
+                    "please_select_file": "Wybierz plik do zaimportowania."
                 }
             },
             "outdated": {
@@ -24,9 +24,16 @@
                 "new_version_available_link": "Kliknij tutaj, aby wyświetlić informacje o wydaniu"
             }
         },
+        "color_selector": {
+            "clear": "Wyczyść kolor",
+            "color": "Kolor",
+            "no_color": "Brak koloru",
+            "no_color_selected": "Żaden kolor nie został wybrany",
+            "randomize": "Losuj kolor"
+        },
         "form": {
             "password": {
-                "toggle_show": ""
+                "toggle_show": "Przełącz wyświetlanie hasła"
             }
         },
         "global": {
@@ -68,9 +75,9 @@
                 "server_print": "Drukuj na serwerze",
                 "titles": "Etykiety",
                 "toast": {
-                    "load_status_failed": "",
-                    "print_failed": "",
-                    "print_success": ""
+                    "load_status_failed": "Nie udało się załadować statusu",
+                    "print_failed": "Nie udało się wydrukować etykiety",
+                    "print_success": "Etykieta wydrukowana"
                 }
             },
             "page_qr_code": {
@@ -83,40 +90,51 @@
         },
         "item": {
             "attachments_list": {
-                "download": "",
-                "open_new_tab": ""
+                "download": "Pobierz",
+                "open_new_tab": "Otwórz w nowej karcie"
             },
             "create_modal": {
-                "delete_photo": "",
+                "delete_photo": "Usuń zdjęcie",
                 "item_description": "Opis przedmiotu",
                 "item_name": "Nazwa przedmiotu",
                 "item_photo": "Zdjęcie Przedmiotu 📷",
-                "item_quantity": "",
-                "parent_item": "",
-                "rotate_photo": "",
-                "set_as_primary_photo": "",
+                "item_quantity": "Ilość przedmiotu",
+                "parent_item": "Przedmiot nadrzędny",
+                "product_tooltip_input_barcode": "Autouzupełnianie za pomocą ręcznie dostarczonego kodu kreskowego",
+                "product_tooltip_scan_barcode": "Autouzupełnianie kodem kreskowym z 📷",
+                "rotate_photo": "Obróć zdjęcie",
+                "set_as_primary_photo": "Ustaw jako { isPrimary, select, true {non-} false {} other {}}główne zdjęcie",
                 "title": "Utwórz przedmiot",
                 "toast": {
-                    "already_creating": "",
-                    "create_failed": "",
-                    "create_success": "",
-                    "failed_load_parent": "",
-                    "no_canvas_support": "",
-                    "please_select_location": "",
-                    "rotate_failed": "",
-                    "rotate_process_failed": "",
-                    "some_photos_failed": "",
-                    "upload_failed": "",
-                    "upload_success": "",
-                    "uploading_photos": ""
+                    "already_creating": "Przedmiot w trakcie tworzenia",
+                    "create_failed": "Nie udało się utworzyć przedmiotu",
+                    "create_success": "Przedmiot utworzony",
+                    "failed_load_parent": "Nie udało się załadować przedmiotu nadrzędnego - proszę wybrać go ręcznie",
+                    "no_canvas_support": "Twoja przeglądarka nie wspiera operacji przy użyciu canvas",
+                    "please_select_location": "Proszę wybrać lokalizację.",
+                    "rotate_failed": "Nie udało się obrócić zdjęcia: { error }",
+                    "rotate_process_failed": "Nie udało się przetworzyć obróconego zdjęcia",
+                    "some_photos_failed": "{count, plural, =0 {Brak zdjęć do przesłania.} =1 {Nie udało się przesłać 1 zdjęcia.} other {Nie udało się przesłać niektórych zdjęć.}}",
+                    "upload_failed": "Nie udało się wysłać zdjęcia: { photoName }",
+                    "upload_success": "{count, plural, =0 {Nie przesłano zdjęć.} =1 {Zdjęcie zostało pomyślnie przesłane.} other {Wszystkie zdjęcia zostały pomyślnie przesłane.}}",
+                    "uploading_photos": "{count, plural, =0 {Brak zdjęć do przesłania} =1 {Przesyłanie 1 zdjęcia…} other {Przesyłanie {count} zdjęć…}}"
                 },
                 "upload_photos": "Prześlij Zdjęcia",
-                "uploaded": ""
+                "uploaded": "Przesłane Zdjęcie"
+            },
+            "product_import": {
+                "barcode": "Kod Kreskowy Produktu",
+                "db_source": "Źródło bazy danych",
+                "error_exception": "Wystąpił wyjątek podczas pobierania kodu kreskowego pozycji: ",
+                "error_invalid_barcode": "Podano nieprawidłowy kod kreskowy",
+                "error_not_found": "Nie znaleziono produktu z podanym kodem kreskowym.",
+                "search_item": "Wyszukaj produkt",
+                "title": "Importuj produkt"
             },
             "selector": {
-                "no_results": "",
-                "placeholder": "",
-                "search_placeholder": ""
+                "no_results": "Brak rezultatów",
+                "placeholder": "Wybierz…",
+                "search_placeholder": "Wpisz, aby wyszukać…"
             },
             "view": {
                 "selectable": {
@@ -130,20 +148,21 @@
                     "page": "Strona",
                     "rows_per_page": "Ilość wierszy na stronę",
                     "table_settings": "Ustawienia Tabeli",
-                    "view_item": ""
+                    "view_item": "Zobacz przedmiot"
                 }
             }
         },
         "label": {
             "create_modal": {
+                "label_color": "Kolor etykiety",
                 "label_description": "Opis etykiety",
                 "label_name": "Nazwa etykiety",
                 "title": "Stwórz nową etykietę",
                 "toast": {
-                    "already_creating": "",
-                    "create_failed": "",
-                    "create_success": "",
-                    "label_name_too_long": ""
+                    "already_creating": "Etykieta jest w trakcie tworzenia",
+                    "create_failed": "Nie udało się utworzyć etykiety",
+                    "create_success": "Etykieta utworzona",
+                    "label_name_too_long": "Etykieta nie może być dłuższa niż 50 znaków"
                 }
             },
             "selector": {
@@ -156,9 +175,9 @@
                 "location_name": "Nazwa lokalizacji",
                 "title": "Utwórz lokalizację",
                 "toast": {
-                    "already_creating": "",
-                    "create_failed": "",
-                    "create_success": ""
+                    "already_creating": "Lokalizacja jest w trakcie tworzenia",
+                    "create_failed": "Nie udało się utworzyć lokalizacji",
+                    "create_success": "Lokalizacja utworzona"
                 }
             },
             "selector": {
@@ -168,13 +187,16 @@
                 "select_location": "Wybierz lokalizację"
             },
             "tree": {
-                "no_locations": "Brak dostępnych lokalizacji. Dodaj nowe lokalizacje poprzez przycisk\n `<`span class=\"link-primary\"`>`Utwórz`<`/span`>` na pasku nawigacyjnym."
+                "no_locations": "Brak dostępnych lokalizacji. Dodaj nowe lokalizacje za pomocą przycisku\n '<span class=\"link-primary\">Utwórz lokalizację</span>' na pasku nawigacyjnym."
             }
         },
         "quick_menu": {
             "no_results": "Nie znaleziono wyników.",
             "shortcut_hint": "Użyj klawiszy numerycznych, aby szybko wybrać akcję."
         }
+    },
+    "errors": {
+        "api_failure": "Wywołanie interfejsu API zaplecza nie powiodło się: "
     },
     "global": {
         "add": "Dodaj",
@@ -184,11 +206,11 @@
         "confirm": "Potwierdź",
         "create": "Utwórz",
         "create_and_add": "Utwórz i dodaj kolejny",
-        "create_subitem": "",
+        "create_subitem": "Utwórz podrzędny przedmiot",
         "created": "Utworzone",
         "delete": "Usuń",
-        "delete_confirm": "",
-        "demo_instance": "",
+        "delete_confirm": "Czy na pewno chcesz usunąć ten przedmiot? ",
+        "demo_instance": "To jest wersja demonstracyjna",
         "details": "Szczegóły",
         "duplicate": "Duplikat",
         "edit": "Edytuj",
@@ -203,7 +225,7 @@
         "items": "Przedmioty",
         "join_discord": "Dołącz do Discorda",
         "labels": "Etykiety",
-        "loading": "",
+        "loading": "Wczytywanie…",
         "locations": "Lokalizacje",
         "maintenance": "Konserwacja",
         "name": "Nazwa",
@@ -211,14 +233,14 @@
         "password": "Hasło",
         "quantity": "Ilość",
         "read_docs": "Przeczytaj dokumentację",
-        "return_home": "",
+        "return_home": "Powrót do strony głównej",
         "save": "Zapisz",
         "search": "Wyszukaj",
         "sign_out": "Wyloguj się",
         "submit": "Wyślij",
-        "unknown": "",
+        "unknown": "Nieznany",
         "update": "Aktualizuj",
-        "updating": "",
+        "updating": "Aktualizacja",
         "value": "Wartość",
         "version": "Wersja:{version}",
         "welcome": "Witaj, {username}"
@@ -244,13 +266,13 @@
         "set_name": "Jak się nazywasz?",
         "set_password": "Ustaw swoje hasło",
         "tagline": "Śledź, organizuj i zarządzaj swoimi rzeczami.",
-        "title": "",
+        "title": "Zorganizuj i oznacz swoje rzeczy",
         "toast": {
-            "invalid_email": "",
-            "invalid_email_password": "",
-            "login_success": "",
-            "problem_registering": "",
-            "user_registered": ""
+            "invalid_email": "Nieprawidłowy adres e-mail",
+            "invalid_email_password": "Nieprawidłowy adres e-mail lub hasło",
+            "login_success": "Zalogowano pomyślnie",
+            "problem_registering": "Problem z rejestracją użytkownika",
+            "user_registered": "Użytkownik zarejestrowany"
         }
     },
     "items": {
@@ -258,25 +280,25 @@
         "advanced": "Zaawansowane",
         "archived": "Zarchiwizowane",
         "asset_id": "Identyfikator zasobu",
-        "associated_with_multiple": "",
+        "associated_with_multiple": "Ten identyfikator zasobu jest powiązany z wieloma przedmiotami",
         "attachment": "Załącznik",
         "attachments": "Załączniki",
         "changes_persisted_immediately": "Zmiany w załącznikach zostaną natychmiast zapisane",
         "created_at": "Data utworzenia",
         "custom_fields": "Pola niestandardowe",
-        "delete_attachment_confirm": "",
-        "delete_item_confirm": "",
+        "delete_attachment_confirm": "Czy na pewno chcesz usunąć ten załącznik?",
+        "delete_item_confirm": "Czy na pewno chcesz usunąć ten przedmiot?",
         "description": "Opis",
         "details": "Szczegóły",
         "drag_and_drop": "Przeciągnij i upuść pliki tutaj lub kliknij, aby wybrać pliki",
         "edit": {
             "edit_attachment_dialog": {
-                "attachment_title": "",
-                "attachment_type": "",
-                "primary_photo": "",
-                "primary_photo_sub": "",
-                "select_type": "",
-                "title": ""
+                "attachment_title": "Tytuł załącznika",
+                "attachment_type": "Typ załącznika",
+                "primary_photo": "Główne zdjęcie",
+                "primary_photo_sub": "Ta opcja jest dostępna tylko dla zdjęć. Tylko jedno zdjęcie może być zdjęciem głównym. Po wybraniu tej opcji, bieżące zdjęcie główne (jeśli takie istnieje) zostanie odznaczone.",
+                "select_type": "Wybierz typ",
+                "title": "Edycja załącznika"
             }
         },
         "edit_details": "Edytuj szczegóły",
@@ -285,7 +307,7 @@
         "first": "Pierwszy",
         "include_archive": "Uwzględnij zarchiwizowane przedmioty",
         "insured": "Ubezpieczony",
-        "invalid_asset_id": "",
+        "invalid_asset_id": "Nieprawidłowy identyfikator zasobu",
         "last": "Ostatni",
         "lifetime_warranty": "Dożywotnia gwarancja",
         "location": "Lokalizacja",
@@ -296,7 +318,7 @@
         "name": "Nazwa",
         "negate_labels": "Neguj wybrane etykiety",
         "next_page": "Następna strona",
-        "no_attachments": "",
+        "no_attachments": "Nie znaleziono załączników",
         "no_results": "Nie znaleziono przedmiotów",
         "notes": "Notatki",
         "only_with_photo": "Tylko przedmioty ze zdjęciem",
@@ -318,44 +340,44 @@
         "receipts": "Paragony",
         "reset_search": "Zresetuj wyszukiwanie",
         "results": "{ total } wyników",
-        "select_field": "",
+        "select_field": "Wybierz pole",
         "serial_number": "Numer seryjny",
         "show_advanced_view_options": "Pokaż ustawienia zaawansowane",
         "sold_at": "Sprzedane w",
         "sold_details": "Szczegóły sprzedaży",
         "sold_price": "Cena sprzedaży",
         "sold_to": "Sprzedane do",
-        "sync_child_locations": "",
+        "sync_child_locations": "Synchronizuj lokalizacje przedmiotów podrzędnych",
         "tip_1": "Filtry lokalizacji i etykiet używają operacji 'LUB'. Jeśli wybrano więcej niż jeden, wystarczy jeden, \naby uzyskać dopasowanie.",
         "tip_2": "Wyszukiwania poprzedzone prefiksem \"#\" będą wysyłać zapytanie o identyfikator zasobu (na przykład \"#000-001\")",
         "tip_3": "Filtry pól używają operacji 'LUB'. Jeśli wybrano więcej niż jeden, wystarczy jeden, \naby uzyskać dopasowanie.",
         "tips": "Wskazówki",
         "tips_sub": "Wskazówki wyszukiwania",
         "toast": {
-            "asset_not_found": "",
-            "attachment_deleted": "",
-            "attachment_updated": "",
-            "attachment_uploaded": "",
-            "child_items_location_no_longer_synced": "",
-            "child_items_location_synced": "",
-            "child_location_desync": "",
-            "error_loading_parent_data": "",
-            "failed_adjust_quantity": "",
-            "failed_delete_attachment": "",
-            "failed_delete_item": "",
-            "failed_duplicate_item": "",
-            "failed_load_asset": "",
-            "failed_load_item": "",
-            "failed_load_items": "",
-            "failed_save": "",
-            "failed_save_no_location": "",
-            "failed_search_items": "",
-            "failed_update_attachment": "",
-            "failed_upload_attachment": "",
-            "item_deleted": "",
-            "item_saved": "",
-            "quantity_cannot_negative": "",
-            "sync_child_location": ""
+            "asset_not_found": "Nie znaleziono przedmiotu",
+            "attachment_deleted": "Załącznik został usunięty",
+            "attachment_updated": "Załącznik zaktualizowany",
+            "attachment_uploaded": "Załącznik przesłany",
+            "child_items_location_no_longer_synced": "Lokalizacje przedmiotów podrzędnych nie będą już synchronizowane z tym przedmiotem.",
+            "child_items_location_synced": "Lokalizacje przedmiotów podrzędnych zostały zsynchronizowane z tym przedmiotem",
+            "child_location_desync": "Zmiana lokalizacji spowoduje desynchronizację z lokalizacją przedmiotu nadrzędnego",
+            "error_loading_parent_data": "Wystąpił błąd podczas próby załadowania danych nadrzędnych",
+            "failed_adjust_quantity": "Nie udało się dostosować ilości",
+            "failed_delete_attachment": "Nie udało się usunąć załącznika",
+            "failed_delete_item": "Nie udało się usunąć przedmiotu",
+            "failed_duplicate_item": "Nie udało się zduplikować przedmiotu",
+            "failed_load_asset": "Nie udało się załadować przedmiotu",
+            "failed_load_item": "Nie udało się załadować przedmiotu",
+            "failed_load_items": "Nie udało się załadować przedmiotów",
+            "failed_save": "Nie udało się zapisać przedmiotu",
+            "failed_save_no_location": "Nie udało się zapisać przedmiotu: nie wybrano lokalizacji",
+            "failed_search_items": "Nie udało się wyszukać przedmiotów",
+            "failed_update_attachment": "Nie udało się zaktualizować załącznika",
+            "failed_upload_attachment": "Nie udało się przesłać załącznika",
+            "item_deleted": "Przedmiot usunięty",
+            "item_saved": "Przedmiot zapisany",
+            "quantity_cannot_negative": "Ilość nie może być ujemna",
+            "sync_child_location": "Wybrany przedmiot nadrzędny synchronizuje lokalizacje swoich dzieci ze swoimi. Lokalizacja została zaktualizowana."
         },
         "updated_at": "Zaktualizowano",
         "warranty": "Gwarancja",
@@ -363,14 +385,14 @@
         "warranty_expires": "Gwarancja wygasa"
     },
     "labels": {
-        "label_delete_confirm": "",
+        "label_delete_confirm": "Czy na pewno chcesz usunąć tę etykietę? Tej czynności nie można cofnąć.",
         "no_results": "Nie znaleziono etykiet",
         "toast": {
-            "failed_delete_label": "",
-            "failed_load_label": "",
-            "failed_update_label": "",
-            "label_deleted": "",
-            "label_updated": ""
+            "failed_delete_label": "Nie udało się usunąć etykiety",
+            "failed_load_label": "Nie udało się załadować etykiety",
+            "failed_update_label": "Nie udało się zaktualizować etykiety",
+            "label_deleted": "Etykieta usunięta",
+            "label_updated": "Etykieta zaktualizowana"
         },
         "update_label": "Aktualizuj etykietę"
     },
@@ -387,8 +409,8 @@
         "it": "włoski",
         "ja-JP": "japoński",
         "ko-KR": "Koreański",
-        "lb-LU": "",
-        "lt-LT": "",
+        "lb-LU": "Luksemburski (Luksemburg)",
+        "lt-LT": "Litewski (Litwa)",
         "nb-NO": "Norweski Bokmål",
         "nl": "holenderski",
         "pl": "polski",
@@ -414,14 +436,14 @@
         "child_locations": "Podlokalizacje",
         "collapse_tree": "Zwiń drzewo",
         "expand_tree": "Rozwiń Drzewo",
-        "location_items_delete_confirm": "",
+        "location_items_delete_confirm": "Czy na pewno chcesz usunąć tę lokalizację i wszystkie jej przedmioty? Tej czynności nie można cofnąć.",
         "no_results": "Nie znaleziono lokalizacji",
         "toast": {
-            "failed_delete_location": "",
-            "failed_load_location": "",
-            "failed_update_location": "",
-            "location_deleted": "",
-            "location_updated": ""
+            "failed_delete_location": "Nie udało się usunąć lokalizacji",
+            "failed_load_location": "Nie udało się załadować lokalizacji",
+            "failed_update_location": "Nie udało się zaktualizować lokalizacji",
+            "location_deleted": "Lokalizacja usunięta",
+            "location_updated": "Lokalizacja zaktualizowana"
         },
         "update_location": "Zaktualizuj lokalizację"
     },
@@ -478,10 +500,10 @@
         "currency_format": "Format waluty",
         "current_password": "Bieżące hasło",
         "delete_account": "Usuń konto",
-        "delete_account_confirm": "",
+        "delete_account_confirm": "Czy na pewno chcesz usunąć swoje konto? Jeśli jesteś ostatnim członkiem grupy, wszystkie Twoje dane zostaną usunięte. Tej czynności nie można cofnąć.",
         "delete_account_sub": "Usuń swoje konto oraz wszystkie powiązane z nim dane. Tego nie można cofnąć.",
-        "delete_notifier_confirm": "",
-        "display_legacy_header": "",
+        "delete_notifier_confirm": "Czy na pewno chcesz usunąć tego powiadamiacza?",
+        "display_legacy_header": "{ currentValue, select, true {Wyłącz starszy nagłówek} false {Włącz starszy nagłówek} other {Brak wartości}}",
         "enabled": "Włączone",
         "example": "Przykład",
         "gen_invite": "Wygeneruj link z zaproszeniem",
@@ -491,27 +513,27 @@
         "language": "Język",
         "new_password": "Nowe hasło",
         "no_notifiers": "Nie skonfigurowano powiadomień",
-        "no_override": "",
+        "no_override": "Bez nadpisania",
         "notifier_modal": "{type, select, true {Edytuj} false {Utwórz} other {Inny}} Powiadomiacz",
         "notifiers": "Powiadomiacze",
         "notifiers_sub": "Otrzymuj powiadomienia o nadchodzących przypomnieniach o konserwacji",
-        "override_locale": "",
+        "override_locale": "Zastąp język daty i waluty",
         "test": "Test",
         "theme_settings": "Ustawienia tematu",
         "theme_settings_sub": "Ustawienia motywu są przechowywane w lokalnej pamięci przeglądarki. Możesz zmienić motyw w dowolnym momencie. \nJeśli masz problemy z ustawieniem motywu, spróbuj odświeżyć przeglądarkę.",
         "toast": {
-            "account_deleted": "",
-            "failed_change_password": "",
-            "failed_create_notifier": "",
-            "failed_delete_account": "",
-            "failed_delete_notifier": "",
-            "failed_get_currencies": "",
-            "failed_test_notifier": "",
-            "failed_update_group": "",
-            "failed_update_notifier": "",
-            "group_updated": "",
-            "notifier_test_success": "",
-            "password_changed": ""
+            "account_deleted": "Twoje konto zostało usunięte.",
+            "failed_change_password": "Nie udało się zmienić hasła.",
+            "failed_create_notifier": "Nie udało się utworzyć powiadamiacza.",
+            "failed_delete_account": "Nie udało się usunąć konta.",
+            "failed_delete_notifier": "Nie udało się usunąć powiadamiacza.",
+            "failed_get_currencies": "Nie udało się pobrać walut",
+            "failed_test_notifier": "Nie udało się przetestować powiadamiacza.",
+            "failed_update_group": "Nie udało się zaktualizować grupy",
+            "failed_update_notifier": "Nie udało się zaktualizować powiadamiacza.",
+            "group_updated": "Grupa zaktualizowana",
+            "notifier_test_success": "Test powiadamiania zakończony pomyślnie.",
+            "password_changed": "Hasło zostało pomyślnie zmienione."
         },
         "update_group": "Zaktualizuj grupę",
         "update_language": "Aktualizuj język",
@@ -521,40 +543,42 @@
     },
     "reports": {
         "label_generator": {
-            "asset_end": "",
-            "asset_start": "",
-            "base_url": "",
-            "bordered_labels": "",
-            "generate_page": "",
-            "input_placeholder": "",
-            "instruction_1": "",
-            "instruction_2": "",
-            "instruction_3": "",
-            "label_height": "",
-            "label_width": "",
-            "measure_type": "",
-            "page_bottom_padding": "",
-            "page_height": "",
-            "page_left_padding": "",
-            "page_right_padding": "",
-            "page_top_padding": "",
-            "page_width": "",
-            "qr_code_example": "",
-            "tip_1": "",
-            "tip_2": "",
-            "tip_3": "",
-            "tips": "",
-            "title": "",
+            "asset_end": "Ostatni przedmiot",
+            "asset_start": "Pierwszy przedmiot",
+            "base_url": "URL do strony",
+            "bordered_labels": "Etykiety obramowane",
+            "generate_page": "Wygeneruj stronę",
+            "input_placeholder": "Wpisz",
+            "instruction_1": "Generator etykiet Homebox to narzędzie, które pomoże Ci drukować etykiety do twojej kolekcji. Są to etykiety do\ndruku z wyprzedzeniem, dzięki czemu możesz wydrukować wiele etykiet i mieć je gotowe do użycia",
+            "instruction_2": "W związku z tym etykiety te działają poprzez drukowanie kodu QR URL i informacji o AssetID na etykiecie. \nJeśli wyłączyłeś/aś AssetID w ustawieniach Homebox, nadal możesz korzystać z tego narzędzia, ale AssetID nie będzie odnosić się do żadnego elementu",
+            "instruction_3": "Ta funkcja jest na wczesnym etapie rozwoju i może ulec zmianie w przyszłych wersjach. Jeśli masz jakieś uwagi, prześlij je\nw '<a href=\"https://github.com/sysadminsmedia/homebox/discussions/53\">dyskusji na GitHubie</a>'",
+            "label_height": "Wysokość etykiety",
+            "label_width": "Szerokość etykiety",
+            "measure_type": "Typ miary",
+            "page_bottom_padding": "Wypełnienie dolnej części strony",
+            "page_height": "Wysokość strony",
+            "page_left_padding": "Wypełnienie lewej strony",
+            "page_right_padding": "Wypełnienie prawej strony",
+            "page_top_padding": "Wypełnienie górnej części strony",
+            "page_width": "Szerokość strony",
+            "qr_code_example": "Przykład kodu QR",
+            "tip_1": "Ustawienia domyślne są skonfigurowane dla\n<a href=\"https://www.avery.com/templates/5260\">arkuszy etykiet Avery 5260</a>. Jeśli używasz innego arkusza,\nmusisz dostosować ustawienia do swojego arkusza.",
+            "tip_2": "Jeśli dostosowujesz arkusz, jego wymiary są podane w calach. Podczas tworzenia arkusza 5260 zauważyłem, że\nwymiary użyte w ich szablonie nie odpowiadały wymiarom potrzebnym do wydrukowania w polach.\n'<b>'Przygotuj się na metodę prób i błędów.'</b>'",
+            "tip_3": "Podczas drukowania pamiętaj o:\n'<ol><li>'Ustaw marginesy na 0 lub Brak'</li><li>'Ustaw skalowanie na 100%'</li><li>'Wyłącz drukowanie dwustronne'</li><li>'Wydrukuj stronę testową przed wydrukowaniem wielu stron'</li></ol>'",
+            "tips": "Wskazówki",
+            "title": "Generator etykiet",
             "toast": {
-                "page_too_small_card": ""
+                "page_too_small_card": "Rozmiar strony jest za mały w stosunku do rozmiaru karty"
             }
         }
     },
     "scanner": {
+        "barcode_detected_message": "wykryto kod kreskowy produktu",
+        "barcode_fetch_data": "Pobierz dane produktu",
         "error": "Wystąpił błąd podczas skanowania",
         "invalid_url": "Nieprawidłowy URL kodu kreskowego",
         "no_sources": "Brak dostępnych źródeł wideo",
-        "permission_denied": "",
+        "permission_denied": "Odmowa dostępu do aparatu, zezwól na dostęp do aparatu w ustawieniach przeglądarki",
         "select_video_source": "Wybierz źródło wideo",
         "title": "Skaner",
         "unsupported": "Media Stream API nie jest obsługiwany bez HTTPS"
@@ -562,20 +586,24 @@
     "tools": {
         "actions": "Akcje na zasobach",
         "actions_set": {
+            "create_missing_thumbnails": "Utwórz brakujące miniatury",
+            "create_missing_thumbnails_button": "Tworzenie miniaturek",
+            "create_missing_thumbnails_confirm": "Czy na pewno chcesz utworzyć brakujące miniatury? Może to chwilę potrwać i nie można tego wstrzymać.",
+            "create_missing_thumbnails_sub": "Tworzy miniatury dla wszystkich załączników obsługiwanych przez bieżącą konfigurację. Jest to przydatne w przypadku załączników przesłanych przed wersją b0.20.0 Homebox. Nie spowoduje to nadpisania istniejących miniatur, a jedynie utworzenie nowych dla załączników, które nie mają miniatur. Należy pamiętać, że miniatury są tworzone w tle i ich utworzenie może chwilę potrwać.",
             "ensure_ids": "Zapewnienie identyfikatorów zasobów",
             "ensure_ids_button": "Zapewnij identyfikatory zasobów",
-            "ensure_ids_confirm": "",
+            "ensure_ids_confirm": "Czy na pewno chcesz, aby wszystkie zasoby miały identyfikatory? Może to chwilę potrwać i nie można tego cofnąć.",
             "ensure_ids_sub": "Zapewnia, że wszystkie przedmioty w Twoim inwentarzu mają prawidłowe pole asset_id. W tym celu wyszukiwany jest najwyższy obecny asset_id w bazie danych, a kolejne wartości są przypisywane do przedmiotów, które nie mają ustawionego pola asset_id. Proces odbywa się w kolejności według pola created_at.",
             "ensure_import_refs": "Zapewnij odnośniki importu",
             "ensure_import_refs_button": "Zapewnij odnośniki importu",
             "ensure_import_refs_sub": "Zapewnia, że wszystkie przedmioty w Twoim inwentarzu mają prawidłowe pole import_ref. W tym celu dla każdego przedmiotu, który nie ma ustawionego pola import_ref, losowo generowany jest 8-znakowy ciąg.",
             "set_primary_photo": "Ustaw główne zdjęcie",
             "set_primary_photo_button": "Ustaw główne zdjęcie",
-            "set_primary_photo_confirm": "",
+            "set_primary_photo_confirm": "Czy na pewno chcesz ustawić zdjęcia główne? To może chwilę potrwać i nie można tego cofnąć.",
             "set_primary_photo_sub": "W wersji v0.10.0 Homebox pole głównego obrazu zostało dodane do załączników typu zdjęcie. Ta akcja ustawi pole głównego obrazu do pierwszego zdjęcia w załącznikach z bazy danych, jeżeli nie jest już ustawione. '<a class=\"link\" href=\"https://github.com/hay-kot/homebox/pull/576\">'Zobacz GitHub PR #576'</a>'",
             "zero_datetimes": "Wyzeruj daty i godziny przedmiotów",
             "zero_datetimes_button": "Wyzeruj daty i godziny przedmiotów",
-            "zero_datetimes_confirm": "",
+            "zero_datetimes_confirm": "Czy na pewno chcesz zresetować wszystkie wartości daty i godziny? Może to chwilę potrwać i nie można tego cofnąć.",
             "zero_datetimes_sub": "Resetuje wartość czasu dla wszystkich pól daty i godziny w Twoim inwentarzu, ustawiając ją na początek dnia. Jest to rozwiązanie problemu, który pojawił się we wczesnej fazie rozwoju aplikacji, powodując zapisywanie wartości czasu wraz z datą, co skutkowało nieprawidłowym wyświetlaniem wartości w polach daty. '<a class=\"link\" href=\"https://github.com/hay-kot/homebox/issues/236\" target=\"_blank\">Zobacz szczegóły w GitHub Issue #236</a>'"
         },
         "actions_sub": "Zastosuj akcje zbiorczo do swojego inwentarza. Są to działania nieodwracalne. '<b>'Bądź ostrożny.'</b>",
@@ -586,7 +614,7 @@
             "export_sub": "Eksportuje standardowy format CSV dla Homebox. Zostaną wyeksportowane wszystkie przedmioty z Twojego inwentarza.",
             "import": "Importuj inwentarz",
             "import_button": "Importuj inwentarz",
-            "import_ref_confirm": "",
+            "import_ref_confirm": "Czy na pewno chcesz, aby wszystkie zasoby miały import_ref? Może to chwilę potrwać i nie można tego cofnąć.",
             "import_sub": "Importuje standardowy format CSV dla Homebox. Jeśli plik nie zawiera kolumny '<code>'HB.import_ref'</code>', istniejące przedmioty w Twoim inwentarzu '<b>'nie'</b>' zostaną nadpisane – zostaną dodane jedynie nowe przedmioty. Wiersze z kolumną '<code>'HB.import_ref'</code>' są łączone z istniejącymi przedmiotami, które mają ten sam import_ref, jeśli taki istnieje."
         },
         "import_export_sub": "Importuj i eksportuj swój inwentarz z i do pliku CSV. Jest to przydatne podczas przenoszenia inwentarza do nowej instancji Homebox.",
@@ -601,11 +629,12 @@
         },
         "reports_sub": "Generuj różne raporty dla swojego inwentarza.",
         "toast": {
-            "asset_success": "",
-            "failed_ensure_ids": "",
-            "failed_ensure_import_refs": "",
-            "failed_set_primary_photos": "",
-            "failed_zero_datetimes": ""
+            "asset_success": "Zaktualizowano { results } przedmiotów.",
+            "failed_create_missing_thumbnails": "Nie udało się utworzyć brakujących miniatur.",
+            "failed_ensure_ids": "Nie udało się sprawdzić identyfikatorów zasobów.",
+            "failed_ensure_import_refs": "Nie udało się zapewnić import_ref.",
+            "failed_set_primary_photos": "Nie udało się ustawić głównych zdjęć.",
+            "failed_zero_datetimes": "Nie udało się zresetować wartości daty i godziny."
         }
     }
 }

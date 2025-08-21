@@ -2,18 +2,18 @@
     "components": {
         "app": {
             "create_modal": {
-                "createAndAddAnother": "",
-                "enter": "",
-                "shift": ""
+                "createAndAddAnother": "Brug {shiftKey} + {enterKey} til at oprette og tilføje en ny.",
+                "enter": "Indtast",
+                "shift": "Flytte"
             },
             "import_dialog": {
                 "change_warning": "Adfærd for imports med eksisterende import_refs har ændret sig. Hvis en import_ref er tilstede i CSV filen,\nvil genstanden blive opdateret med værdierne fra CSV filen.",
                 "description": "Importer en CSV fil som indeholder dine genstande, etiketter, og lokationer. Se dokumentation for mere information vedrørende\nden korrekte format.",
                 "title": "Importer CSV Fil",
                 "toast": {
-                    "import_failed": "",
-                    "import_success": "",
-                    "please_select_file": ""
+                    "import_failed": "Importen mislykkedes. Prøv igen senere.",
+                    "import_success": "Importen er gennemført!",
+                    "please_select_file": "Vælg venligst en fil, der skal importeres."
                 }
             },
             "outdated": {
@@ -24,9 +24,16 @@
                 "new_version_available_link": "Klik her for at læse udgivelsesnoterne"
             }
         },
+        "color_selector": {
+            "clear": "Reset farve",
+            "color": "Farve",
+            "no_color": "Ingen farve",
+            "no_color_selected": "Ingen farve valgt",
+            "randomize": "Tilfældig farve"
+        },
         "form": {
             "password": {
-                "toggle_show": ""
+                "toggle_show": "Slå adgangskode til/fra Vis"
             }
         },
         "global": {
@@ -68,9 +75,9 @@
                 "server_print": "Print på Server",
                 "titles": "Labels",
                 "toast": {
-                    "load_status_failed": "",
-                    "print_failed": "",
-                    "print_success": ""
+                    "load_status_failed": "Status kunne ikke indlæses",
+                    "print_failed": "Kunne ikke udskrive etiketten",
+                    "print_success": "Etiket udskrevet"
                 }
             },
             "page_qr_code": {
@@ -83,40 +90,40 @@
         },
         "item": {
             "attachments_list": {
-                "download": "",
-                "open_new_tab": ""
+                "download": "Download",
+                "open_new_tab": "Åbn i ny fane"
             },
             "create_modal": {
-                "delete_photo": "",
+                "delete_photo": "Slet billede",
                 "item_description": "Genstandsbeskrivelse",
                 "item_name": "Genstandsnavn",
                 "item_photo": "Vare Foto 📷",
-                "item_quantity": "",
-                "parent_item": "",
-                "rotate_photo": "",
-                "set_as_primary_photo": "",
+                "item_quantity": "Vare Antal",
+                "parent_item": "Overordnet element",
+                "rotate_photo": "Roter foto",
+                "set_as_primary_photo": "Sæt som { isPrimary, select, true {non-} false {} other {}}primært foto",
                 "title": "Opret genstand",
                 "toast": {
-                    "already_creating": "",
-                    "create_failed": "",
-                    "create_success": "",
-                    "failed_load_parent": "",
-                    "no_canvas_support": "",
-                    "please_select_location": "",
-                    "rotate_failed": "",
-                    "rotate_process_failed": "",
-                    "some_photos_failed": "",
-                    "upload_failed": "",
-                    "upload_success": "",
-                    "uploading_photos": ""
+                    "already_creating": "Opretter allerede et element",
+                    "create_failed": "Kunne ikke oprette elementet",
+                    "create_success": "Element oprettet",
+                    "failed_load_parent": "Kunne ikke indlæse overordnet element - vælg venligst manuelt",
+                    "no_canvas_support": "Din browser understøtter ikke canvas-handlinger",
+                    "please_select_location": "Vælg venligst en placering.",
+                    "rotate_failed": "Kunne ikke rotere billedet: { error }",
+                    "rotate_process_failed": "Kunne ikke behandle roteret billede",
+                    "some_photos_failed": "{count, plural, =0 {Ingen billeder at uploade.} =1 {1 billede kunne ikke uploades.} other {Nogle billeder kunne ikke uploades.}}",
+                    "upload_failed": "Kunne ikke uploade billede: { photoName }",
+                    "upload_success": "{count, plural, =0 {Ingen billeder uploadet.} =1 {Foto uploadet.} other {Alle billeder uploadet.}}",
+                    "uploading_photos": "{count, plural, =0 {Ingen billeder at uploade} =1 {Uploader 1 billede…} other {Uploader {count} billeder…}}"
                 },
                 "upload_photos": "Upload Billeder",
-                "uploaded": ""
+                "uploaded": "Uploadet billede"
             },
             "selector": {
-                "no_results": "",
-                "placeholder": "",
-                "search_placeholder": ""
+                "no_results": "Ingen resultater fundet",
+                "placeholder": "Vælg…",
+                "search_placeholder": "Skriv for at søge…"
             },
             "view": {
                 "selectable": {
@@ -126,24 +133,25 @@
                     "table": "Tabel"
                 },
                 "table": {
-                    "headers": "",
+                    "headers": "Overskrifter",
                     "page": "Side",
                     "rows_per_page": "Rækker per side",
                     "table_settings": "Tabel Indstillinger",
-                    "view_item": ""
+                    "view_item": "Se vare"
                 }
             }
         },
         "label": {
             "create_modal": {
+                "label_color": "Etiketfarve",
                 "label_description": "Etiketbeskrivelse",
                 "label_name": "Etiketnavn",
                 "title": "Opret label",
                 "toast": {
-                    "already_creating": "",
-                    "create_failed": "",
-                    "create_success": "",
-                    "label_name_too_long": ""
+                    "already_creating": "Allerede oprettet en etiket",
+                    "create_failed": "Kunne ikke oprette etiket",
+                    "create_success": "Etiket oprettet",
+                    "label_name_too_long": "Etiketnavnet må ikke være længere end 50 tegn"
                 }
             },
             "selector": {
@@ -156,69 +164,69 @@
                 "location_name": "Lokationsnavn",
                 "title": "Opret lokation",
                 "toast": {
-                    "already_creating": "",
-                    "create_failed": "",
-                    "create_success": ""
+                    "already_creating": "Allerede oprettet en lokation",
+                    "create_failed": "Kunne ikke oprette placering",
+                    "create_success": "Placering oprettet"
                 }
             },
             "selector": {
-                "no_location_found": "",
+                "no_location_found": "Ingen placering fundet",
                 "parent_location": "Forældrelokation",
-                "search_location": "",
-                "select_location": ""
+                "search_location": "Søg efter placeringer",
+                "select_location": "Vælg en placering"
             },
             "tree": {
-                "no_locations": "Ingen tilgængelige lokationer. Opret nye lokationer gennem\n`<`span class=\"link-primary\">`Opret`<`/span`>` knappen i navigationslinjen."
+                "no_locations": "Ingen tilgængelige placeringer. Tilføj nye placeringer via knappen \n'<span class=\"link-primary\">'Opret'</span>' på navigationslinjen."
             }
         },
         "quick_menu": {
-            "no_results": "",
+            "no_results": "Ingen resultater fundet.",
             "shortcut_hint": "Brug de numeriske taster til hurtigt at vælge en handling."
         }
     },
     "global": {
         "add": "Tilføj",
-        "archived": "",
+        "archived": "Arkiveret",
         "build": "Build: { build }",
-        "cancel": "",
+        "cancel": "Ophæv",
         "confirm": "Bekræft",
         "create": "Opret",
         "create_and_add": "Opret og tilføj ny",
-        "create_subitem": "",
+        "create_subitem": "Opret underelement",
         "created": "Oprettet",
         "delete": "Slet",
-        "delete_confirm": "",
-        "demo_instance": "",
+        "delete_confirm": "Er du sikker på, at du vil slette dette element? ",
+        "demo_instance": "Dette er en demo-instans",
         "details": "Detaljer",
         "duplicate": "Dupliker",
         "edit": "Rediger",
         "email": "Email",
         "follow_dev": "Følg udvikleren",
         "footer": {
-            "api_link": "",
-            "version_link": ""
+            "api_link": "'<a href=\"https://homebox.software/en/api/\" target=\"_blank\">'API'</a>'",
+            "version_link": "'<'a href=\"https://github.com/sysadminsmedia/homebox/releases/tag/{ version }\" target=\"_blank\"'>' Version: { version } Build: { build } '</a>'"
         },
         "github": "GitHub projekt",
-        "insured": "",
+        "insured": "Forsikret",
         "items": "Genstande",
         "join_discord": "Deltag i vores Discord",
         "labels": "Etiketter",
-        "loading": "",
+        "loading": "Indlæser…",
         "locations": "Lokationer",
         "maintenance": "Opretholdelse",
         "name": "Navn",
         "navigate": "Naviger",
         "password": "Adgangskode",
-        "quantity": "",
+        "quantity": "Mængde",
         "read_docs": "Læs Docs",
-        "return_home": "",
+        "return_home": "Vend hjem",
         "save": "Gem",
         "search": "Søg",
         "sign_out": "Log ud",
         "submit": "Indsend",
-        "unknown": "",
+        "unknown": "Ukendt",
         "update": "Opdater",
-        "updating": "",
+        "updating": "Opdaterer",
         "value": "Værdi",
         "version": "Version: { version }",
         "welcome": "Velkommen, { username }"
@@ -244,13 +252,13 @@
         "set_name": "Hvad hedder du?",
         "set_password": "Opret din adgangskode",
         "tagline": "Følg, Organiser, og Håndter dine Ting.",
-        "title": "",
+        "title": "Organiser og Tag dine ting",
         "toast": {
-            "invalid_email": "",
-            "invalid_email_password": "",
-            "login_success": "",
-            "problem_registering": "",
-            "user_registered": ""
+            "invalid_email": "Ugyldig e-mailadresse",
+            "invalid_email_password": "Ugyldig e-mail eller adgangskode",
+            "login_success": "Logget ind",
+            "problem_registering": "Problem med at registrere bruger",
+            "user_registered": "Bruger registreret"
         }
     },
     "items": {
@@ -258,25 +266,25 @@
         "advanced": "Avanceret",
         "archived": "Arkiveret",
         "asset_id": "Aktiv-id",
-        "associated_with_multiple": "",
+        "associated_with_multiple": "Dette aktiv-id er knyttet til flere varer",
         "attachment": "Vedhæftning",
         "attachments": "Vedhæftninger",
         "changes_persisted_immediately": "Ændringer af vedhæftede filer gemmes med det samme",
         "created_at": "Oprettet den",
         "custom_fields": "Brugerdefinerede felter",
-        "delete_attachment_confirm": "",
-        "delete_item_confirm": "",
+        "delete_attachment_confirm": "Er du sikker på, at du vil slette denne vedhæftede fil?",
+        "delete_item_confirm": "Er du sikker på, at du vil slette dette element?",
         "description": "Beskrivelse",
         "details": "Detaljer",
         "drag_and_drop": "Træk og slip filer her, eller klik for at vælge filer",
         "edit": {
             "edit_attachment_dialog": {
-                "attachment_title": "",
-                "attachment_type": "",
-                "primary_photo": "",
-                "primary_photo_sub": "",
-                "select_type": "",
-                "title": ""
+                "attachment_title": "Titel på vedhæftet fil",
+                "attachment_type": "Vedhæftningstype",
+                "primary_photo": "Primært foto",
+                "primary_photo_sub": "Denne mulighed er kun tilgængelig for fotos. Kun ét foto kan være primært. Hvis du vælger denne mulighed, vil det aktuelle primære foto, hvis der er et, blive fravalgt.",
+                "select_type": "Vælg en type",
+                "title": "Rediger vedhæftet fil"
             }
         },
         "edit_details": "Rediger detaljer",
@@ -285,7 +293,7 @@
         "first": "Første",
         "include_archive": "Medtag arkiverede elementer",
         "insured": "Forsikret",
-        "invalid_asset_id": "",
+        "invalid_asset_id": "Ugyldigt aktiv-ID",
         "last": "Sidst",
         "lifetime_warranty": "livstidsgaranti",
         "location": "Lokalitet",
@@ -296,7 +304,7 @@
         "name": "Navn",
         "negate_labels": "Ophæv valgte etiketter",
         "next_page": "Næste side",
-        "no_attachments": "",
+        "no_attachments": "Ingen vedhæftede filer fundet",
         "no_results": "Ingen elementer fundet",
         "notes": "Noter",
         "only_with_photo": "Kun elementer med foto",
@@ -318,44 +326,44 @@
         "receipts": "Kvitteringer",
         "reset_search": "Nulstil Søgning",
         "results": "{ total } Wyniki",
-        "select_field": "",
+        "select_field": "Vælg et felt",
         "serial_number": "Serienummer",
         "show_advanced_view_options": "vis avancerede indstillinger",
         "sold_at": "Solgt D.",
         "sold_details": "Salgs detaljer",
         "sold_price": "Solgt pris",
         "sold_to": "Sold til",
-        "sync_child_locations": "",
+        "sync_child_locations": "Synkroniser placeringer af underordnede elementer",
         "tip_1": "Placerings- og etiketfiltre bruger betjeningen 'ELLER'. Hvis mere end én er valgt, kræves der kun én\n til et match.",
         "tip_2": "Søgninger med præfikset '#'' vil forespørge efter et aktiv-id (eksempel '#000-001')",
         "tip_3": "Feltfiltre bruger handlingen 'ELLER'. Hvis mere end én er valgt, kræves der kun én til en\n kamp.",
         "tips": "Tips",
         "tips_sub": "Søgetips",
         "toast": {
-            "asset_not_found": "",
-            "attachment_deleted": "",
-            "attachment_updated": "",
-            "attachment_uploaded": "",
-            "child_items_location_no_longer_synced": "",
-            "child_items_location_synced": "",
-            "child_location_desync": "",
-            "error_loading_parent_data": "",
-            "failed_adjust_quantity": "",
-            "failed_delete_attachment": "",
-            "failed_delete_item": "",
-            "failed_duplicate_item": "",
-            "failed_load_asset": "",
-            "failed_load_item": "",
-            "failed_load_items": "",
-            "failed_save": "",
-            "failed_save_no_location": "",
-            "failed_search_items": "",
-            "failed_update_attachment": "",
-            "failed_upload_attachment": "",
-            "item_deleted": "",
-            "item_saved": "",
-            "quantity_cannot_negative": "",
-            "sync_child_location": ""
+            "asset_not_found": "Aktivet blev ikke fundet",
+            "attachment_deleted": "Vedhæftet fil slettet",
+            "attachment_updated": "Vedhæftet fil opdateret",
+            "attachment_uploaded": "Vedhæftet fil uploadet",
+            "child_items_location_no_longer_synced": "Placeringen af underelementer vil ikke længere blive synkroniseret med dette element.",
+            "child_items_location_synced": "Placeringerne af underordnede elementer er blevet synkroniseret med dette element",
+            "child_location_desync": "Ændring af placering vil afsynkronisere den fra forælderens placering",
+            "error_loading_parent_data": "Noget gik galt under indlæsning af overordnede data",
+            "failed_adjust_quantity": "Kunne ikke justere mængden",
+            "failed_delete_attachment": "Kunne ikke slette vedhæftet fil",
+            "failed_delete_item": "Kunne ikke slette elementet",
+            "failed_duplicate_item": "Kunne ikke duplikere elementet",
+            "failed_load_asset": "Kunne ikke indlæse aktiv",
+            "failed_load_item": "Kunne ikke indlæse elementet",
+            "failed_load_items": "Kunne ikke indlæse elementer",
+            "failed_save": "Kunne ikke gemme elementet",
+            "failed_save_no_location": "Kunne ikke gemme elementet: ingen placering valgt",
+            "failed_search_items": "Kunne ikke søge efter elementer",
+            "failed_update_attachment": "Kunne ikke opdatere vedhæftet fil",
+            "failed_upload_attachment": "Kunne ikke uploade vedhæftet fil",
+            "item_deleted": "Element slettet",
+            "item_saved": "Element gemt",
+            "quantity_cannot_negative": "Mængden må ikke være negativ",
+            "sync_child_location": "Den valgte forælder synkroniserer sine børns placeringer med sine egne. Placeringen er blevet opdateret."
         },
         "updated_at": "Opdateret d.",
         "warranty": "Garanti",
@@ -363,32 +371,32 @@
         "warranty_expires": "Garantien udløber"
     },
     "labels": {
-        "label_delete_confirm": "",
+        "label_delete_confirm": "Er du sikker på, at du vil slette denne etiket? Denne handling kan ikke fortrydes.",
         "no_results": "Ingen etiketter fundet",
         "toast": {
-            "failed_delete_label": "",
-            "failed_load_label": "",
-            "failed_update_label": "",
-            "label_deleted": "",
-            "label_updated": ""
+            "failed_delete_label": "Etiketten kunne ikke slettes",
+            "failed_load_label": "Etiketten kunne ikke indlæses",
+            "failed_update_label": "Etiketten kunne ikke opdateres",
+            "label_deleted": "Etiket slettet",
+            "label_updated": "Etiket opdateret"
         },
         "update_label": "Opdater etiket"
     },
     "languages": {
         "ca": "Catalansk",
-        "cs-CZ": "",
+        "cs-CZ": "Tjekkisk",
         "de": "Tysk",
         "en": "Engelsk",
         "es": "Spansk",
-        "fi-FI": "",
+        "fi-FI": "Finsk",
         "fr": "Fransk",
         "hu": "Ungarsk",
-        "id-ID": "",
+        "id-ID": "Indonesisk",
         "it": "Italiensk",
         "ja-JP": "Japansk",
-        "ko-KR": "",
-        "lb-LU": "",
-        "lt-LT": "",
+        "ko-KR": "Koreansk",
+        "lb-LU": "Luxembourgsk (Luxembourg)",
+        "lt-LT": "Litauisk (Litauen)",
         "nb-NO": "Norsk",
         "nl": "Hollandsk",
         "pl": "Polsk",
@@ -396,7 +404,7 @@
         "pt-PT": "Portugisisk (Portugal)",
         "ru": "Russisk",
         "sl": "Slovensk",
-        "sq-AL": "",
+        "sq-AL": "Albansk",
         "sv": "Svensk",
         "ta-IN": "Tamilsk",
         "th-TH": "Thailandsk",
@@ -413,15 +421,15 @@
     "locations": {
         "child_locations": "Underordnede placeringer",
         "collapse_tree": "Kollaps træ",
-        "expand_tree": "",
-        "location_items_delete_confirm": "",
+        "expand_tree": "Udvid træ",
+        "location_items_delete_confirm": "Er du sikker på, at du vil slette denne placering og alle dens elementer? Denne handling kan ikke fortrydes.",
         "no_results": "Ingen placeringer fundet",
         "toast": {
-            "failed_delete_location": "",
-            "failed_load_location": "",
-            "failed_update_location": "",
-            "location_deleted": "",
-            "location_updated": ""
+            "failed_delete_location": "Kunne ikke slette placeringen",
+            "failed_load_location": "Placeringen kunne ikke indlæses",
+            "failed_update_location": "Kunne ikke opdatere placeringen",
+            "location_deleted": "Placering slettet",
+            "location_updated": "Placering opdateret"
         },
         "update_location": "Opdatér sted"
     },
@@ -478,10 +486,10 @@
         "currency_format": "Valuta format",
         "current_password": "Aktuel adgangskode",
         "delete_account": "Slet Konto",
-        "delete_account_confirm": "",
+        "delete_account_confirm": "Er du sikker på, at du vil slette din konto? Hvis du er det sidste medlem i din gruppe, vil alle dine data blive slettet. Denne handling kan ikke fortrydes.",
         "delete_account_sub": "Slet din konto og alle dens tilknyttede data. Dette kan ikke laves om.",
-        "delete_notifier_confirm": "",
-        "display_legacy_header": "",
+        "delete_notifier_confirm": "Er du sikker på, at du vil slette denne underretter?",
+        "display_legacy_header": "{ currentValue, select, true {Deaktiver Legacy Header} false {Aktiver Legacy Header} other {Ikke ramt}}",
         "enabled": "Aktiveret",
         "example": "Eksempel",
         "gen_invite": "Generer invitationslink",
@@ -491,27 +499,27 @@
         "language": "Sprog",
         "new_password": "Ny Adgangskode",
         "no_notifiers": "Ingen notifikationer konfiguret",
-        "no_override": "",
+        "no_override": "Ingen tilsidesættelse",
         "notifier_modal": "{ type, select, true {Rediger} false {Opret} other {Andet}} Meddeler",
         "notifiers": "Meddelere",
         "notifiers_sub": "Få notifikationer om kommende vedligeholdelsespåmindelser",
-        "override_locale": "",
+        "override_locale": "Tilsidesæt dato og valutasprog",
         "test": "Test",
         "theme_settings": "Temaindstillinger",
         "theme_settings_sub": "Temaindstillinger gemmes i din browsers lokale lager. Du kan til enhver tid ændre temaet. Hvis du har\n problemer med at indstille dit tema, kan du prøve at opdatere din browser.",
         "toast": {
-            "account_deleted": "",
-            "failed_change_password": "",
-            "failed_create_notifier": "",
-            "failed_delete_account": "",
-            "failed_delete_notifier": "",
-            "failed_get_currencies": "",
-            "failed_test_notifier": "",
-            "failed_update_group": "",
-            "failed_update_notifier": "",
-            "group_updated": "",
-            "notifier_test_success": "",
-            "password_changed": ""
+            "account_deleted": "Din konto er blevet slettet.",
+            "failed_change_password": "Kunne ikke ændre adgangskode.",
+            "failed_create_notifier": "Kunne ikke oprette underretteren.",
+            "failed_delete_account": "Kunne ikke slette din konto.",
+            "failed_delete_notifier": "Kunne ikke slette underretteren.",
+            "failed_get_currencies": "Kunne ikke hente valutaer",
+            "failed_test_notifier": "Kunne ikke teste underretteren.",
+            "failed_update_group": "Gruppen kunne ikke opdateres",
+            "failed_update_notifier": "Kunne ikke opdatere underretteren.",
+            "group_updated": "Gruppen er opdateret",
+            "notifier_test_success": "Underretter-testen er gennemført.",
+            "password_changed": "Adgangskoden er ændret."
         },
         "update_group": "Opdatér Gruppe",
         "update_language": "Opdater sprogfil",
@@ -521,32 +529,32 @@
     },
     "reports": {
         "label_generator": {
-            "asset_end": "",
-            "asset_start": "",
-            "base_url": "",
-            "bordered_labels": "",
-            "generate_page": "",
-            "input_placeholder": "",
-            "instruction_1": "",
-            "instruction_2": "",
-            "instruction_3": "",
-            "label_height": "",
-            "label_width": "",
-            "measure_type": "",
-            "page_bottom_padding": "",
-            "page_height": "",
-            "page_left_padding": "",
-            "page_right_padding": "",
-            "page_top_padding": "",
-            "page_width": "",
-            "qr_code_example": "",
-            "tip_1": "",
-            "tip_2": "",
-            "tip_3": "",
-            "tips": "",
-            "title": "",
+            "asset_end": "Aktivets slut",
+            "asset_start": "Aktivets start",
+            "base_url": "Base URL",
+            "bordered_labels": "Etiketter med kant",
+            "generate_page": "Generer side",
+            "input_placeholder": "Skriv her",
+            "instruction_1": "Homebox Label Generator er et værktøj, der hjælper dig med at udskrive etiketter til dit Homebox-lager. Disse er beregnet til\nat være etiketter, der kan udskrives på forhånd, så du kan udskrive mange etiketter og have dem klar til påsætning.",
+            "instruction_2": "Disse etiketter fungerer derfor ved at udskrive en URL, QR-kode og AssetID-oplysninger på en etiket. Hvis du har deaktiveret\nAssetID'er i dine Homebox-indstillinger, kan du stadig bruge dette værktøj, men AssetID'erne vil ikke referere til nogen varer.",
+            "instruction_3": "Denne funktion er i de tidlige udviklingsfaser og kan ændres i fremtidige udgivelser. Hvis du har feedback, bedes\ndu give den i '<a href=\"https://github.com/sysadminsmedia/homebox/discussions/53\">'GitHub-diskussionen'</a>'",
+            "label_height": "Etikethøjde",
+            "label_width": "Etiketbredde",
+            "measure_type": "Målingstype",
+            "page_bottom_padding": "Sidebundspolstring",
+            "page_height": "Sidehøjde",
+            "page_left_padding": "Venstre sidepolstring",
+            "page_right_padding": "Højre sidepolstring",
+            "page_top_padding": "Sidetoppolstring",
+            "page_width": "Sidebredde",
+            "qr_code_example": "Eksempel på QR-kode",
+            "tip_1": "Standardindstillingerne her er konfigureret for\n'<a href=\"https://www.avery.com/templates/5260\">'Avery 5260 etiketark'</a>'. Hvis du bruger et andet ark,\nskal du justere indstillingerne, så de passer til dit ark.",
+            "tip_2": "Hvis du tilpasser dit ark, er dimensionerne i tommer. Da jeg byggede 5260-arket, opdagede jeg, at de\ndimensioner, der blev brugt i deres skabelon, ikke matchede det, der var nødvendigt for at udskrive i felterne.\n'<b>'Vær forberedt på nogle forsøg og fejl.'</b>'",
+            "tip_3": "Ved printning sørg for at:\n'<ol><li>'Indstil margenerne til 0 eller Ingen'</li><li>'Indstil skaleringen til 100%'</li><li>'Deaktiver dobbeltsidet udskrivning'</li><li>'Udskriv en testside, før du udskriver flere sider'</li></ol>'",
+            "tips": "Tips",
+            "title": "Etiketgenerator",
             "toast": {
-                "page_too_small_card": ""
+                "page_too_small_card": "Sidestørrelsen er for lille til kortstørrelsen"
             }
         }
     },
@@ -554,28 +562,32 @@
         "error": "Der skete en fejl under skanningen",
         "invalid_url": "Ugyldig stregkode-URL",
         "no_sources": "Ingen videokilder er tilgængelig",
-        "permission_denied": "",
+        "permission_denied": "Kameratilladelse nægtet, Tillad venligst adgang til kameraet i dine browserindstillinger",
         "select_video_source": "Vælg en videokilde",
-        "title": "",
+        "title": "Skanner",
         "unsupported": "Media Stream API understøttes ikke uden HTTPS"
     },
     "tools": {
         "actions": "Handlinger på lagerbeholdning",
         "actions_set": {
+            "create_missing_thumbnails": "Opret manglende miniaturebilleder",
+            "create_missing_thumbnails_button": "Opret miniaturebilleder",
+            "create_missing_thumbnails_confirm": "Er du sikker på, at du vil oprette manglende miniaturebilleder? Dette kan tage et stykke tid og kan ikke sættes på pause.",
+            "create_missing_thumbnails_sub": "Opretter miniaturebilleder for alle vedhæftede filer, der understøttes af den aktuelle konfiguration. Dette er nyttigt for vedhæftede filer, der blev uploadet før v0.20.0-udgivelsen af Homebox. Dette overskriver ikke eksisterende miniaturebilleder, men opretter kun nye for vedhæftede filer, der ikke har et miniaturebillede. Bemærk, at miniaturebillederne oprettes i baggrunden og kan tage et stykke tid at fuldføre.",
             "ensure_ids": "Sørg for aktiv-id'er",
             "ensure_ids_button": "Sørg for aktiv-id'er",
-            "ensure_ids_confirm": "",
+            "ensure_ids_confirm": "Er du sikker på, at du vil sikre dig, at alle aktiver har et ID? Dette kan tage et stykke tid og kan ikke fortrydes.",
             "ensure_ids_sub": "Sikrer, at alle varer på lageret har et gyldigt asset_id felt. Dette gøres ved at finde det højeste aktuelle aktiv_id felt i databasen og anvende den næste værdi på hvert element, der har et ikke sat aktiv_id felt. Dette gøres i rækkefølge efter feltet opret_den.",
             "ensure_import_refs": "Sørg for importreferencer",
             "ensure_import_refs_button": "Sørg for importreferencer",
             "ensure_import_refs_sub": "Sikrer, at alle varer på lageret har et gyldigt import_ref felt. Dette gøres ved tilfældigt at generere en streng på 8 tegn for hvert element, der har et uindstillet import_ref felt.",
             "set_primary_photo": "Indstil primært foto",
             "set_primary_photo_button": "Indstil primært foto",
-            "set_primary_photo_confirm": "",
+            "set_primary_photo_confirm": "Er du sikker på, at du vil indstille primære billeder? Dette kan tage et stykke tid og kan ikke fortrydes.",
             "set_primary_photo_sub": "I version v0.10.0 af Homebox blev det primære billedfelt tilføjet til vedhæftede filer af typen foto. Denne handling indstiller det primære billedfelt til det første billede i matrixen for vedhæftede filer i databasen, hvis det ikke allerede er angivet. '<a class=\"link\" href=\"https://github.com/hay-kot/homebox/pull/576\">'Se GitHub PR #576'</a>'",
             "zero_datetimes": "Nul Vare Dato Tider",
             "zero_datetimes_button": "Nul Varedato Tider",
-            "zero_datetimes_confirm": "",
+            "zero_datetimes_confirm": "Er du sikker på, at du vil nulstille alle dato- og klokkeslætsværdier? Dette kan tage et stykke tid og kan ikke fortrydes.",
             "zero_datetimes_sub": "Nulstiller klokkeslætsværdien for alle dato- og klokkeslætsfelter i lageret til begyndelsen af datoen. Dette er for at rette en fejl, der blev introduceret tidligt i udviklingen af webstedet, der forårsagede, at tidsværdien blev gemt med tiden, hvilket forårsagede problemer med datofelter, der viste nøjagtige værdier. '<a class=\"link\" href=\"https://github.com/hay-kot/homebox/issues/236\" target=\"_blank\">'Se Github-udgave #236 for flere detaljer.'</a>'"
         },
         "actions_sub": "Anvend flere handlinger på din beholdning på én gang. Det er uigenkaldelige handlinger. '<b>'Vær forsigtig.'</b>'",
@@ -586,7 +598,7 @@
             "export_sub": "Eksporterer standard CSV-formatet til Homebox. Dette vil eksportere alle varer i dit lager.",
             "import": "Importeret beholdning",
             "import_button": "Importer beholdning",
-            "import_ref_confirm": "",
+            "import_ref_confirm": "Er du sikker på, at du vil sikre dig, at alle aktiver har en import_ref? Dette kan tage et stykke tid og kan ikke fortrydes.",
             "import_sub": "Importerer standard CSV-formatet til Homebox. Uden en '<code>'HB.import_ref'</code>'-kolonne vil dette '<b>'ikke'</b>' overskrive eksisterende genstande i dit lager, kun tilføje nye genstande. Rækker med kolonnen \"<code>HB.import_ref\"</code> flettes ind i eksisterende elementer med samme import_ref, hvis der findes en."
         },
         "import_export_sub": "Importér og eksporter din lagerbeholdning til og fra en CSV-fil. Dette er nyttigt til at migrere dit lager til en ny forekomst af Homebox.",
@@ -601,11 +613,12 @@
         },
         "reports_sub": "Generer forskellige rapporter for dit lager.",
         "toast": {
-            "asset_success": "",
-            "failed_ensure_ids": "",
-            "failed_ensure_import_refs": "",
-            "failed_set_primary_photos": "",
-            "failed_zero_datetimes": ""
+            "asset_success": "Aktiverne i { results } er blevet opdateret.",
+            "failed_create_missing_thumbnails": "Kunne ikke oprette manglende miniaturebilleder.",
+            "failed_ensure_ids": "Kunne ikke sikre aktiv-ID'er.",
+            "failed_ensure_import_refs": "Kunne ikke sikre importreferencer.",
+            "failed_set_primary_photos": "Kunne ikke indstille primære billeder.",
+            "failed_zero_datetimes": "Dato- og klokkeslætsværdier kunne ikke nulstilles."
         }
     }
 }
