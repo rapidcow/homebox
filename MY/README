@@ -12,3 +12,17 @@ date/versions if i get to it later, i don't know.
 To uninstall i imagine something like this will do:
 
 git clean -fx ; rm -rf /usr/local/opt/homebox*
+
+To *just* build the backend because JavaScript is a
+ginormous memory-hog:
+
+make build-backend && ...
+
+(Also in case that annoying "JS heap OOM" shows up,
+export one of these for subprocesses to see:
+
+NODE_OPTIONS="--max-old-space-size=2048"
+NODE_OPTIONS="--max-old-space-size=4096"
+NODE_OPTIONS="--max-old-space-size=8192"
+
+Don't worry things probably won't crash :'D)
