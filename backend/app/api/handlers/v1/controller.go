@@ -82,6 +82,7 @@ type (
 	Build struct {
 		Version   string `json:"version"`
 		Commit    string `json:"commit"`
+		GitwebUrl string `json:"gitwebUrl"`
 		BuildTime string `json:"buildTime"`
 	}
 
