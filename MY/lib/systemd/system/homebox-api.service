@@ -1,0 +1,12 @@
+[Unit]
+Description="homebox backend api"
+
+[Service]
+ExecStart=/usr/local/opt/homebox/bin/api
+# Documented in systemd.exec(5)
+WorkingDirectory=/usr/local/opt/homebox
+EnvironmentFile=/usr/local/etc/homebox/homebox.env
+User=www-data
+
+[Install]
+WantedBy=multi.user-target

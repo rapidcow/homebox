@@ -1,0 +1,19 @@
+.PHONY: install
+
+prefix = /usr/local
+
+install:
+	@# ${prefix}/etc/
+	install -m 755 -d ${prefix}/etc
+	install -m 700 -d ${prefix}/etc/homebox
+	chown www-data:www-data ${prefix}/etc/homebox
+	install -m 644 etc/homebox.env ${prefix}/etc/homebox/homebox.env
+	@# ${prefix}/lib/
+	install -m 755 -d ${prefix}/lib/systemd/system
+	install -m 644 lib/systemd/system/homebox-api.service ${prefix}/lib/systemd/system/
+	@# ${prefix}/var/
+	install -m 755 -d ${prefix}/var
+	install -m 700 -d ${prefix}/var/homebox
+	chown www-data:www-data ${prefix}/var/homebox
+
+# vim: set noet ts=8 sw=8 sts=8 ft=make :

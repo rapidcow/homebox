@@ -66,4 +66,4 @@ backend-builder:
 	" -o bin/api -v app/api/*.go
 	chmod +x build/backend/bin/api
 
-# vim: set noet ts=8 sw=8 sts=8 :
+# vim: set noet ts=8 sw=8 sts=8 ft=make :
