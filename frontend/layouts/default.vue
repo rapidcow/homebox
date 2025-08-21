@@ -154,7 +154,7 @@
               <span
                 v-html="
                   DOMPurify.sanitize(
-                    $t('global.footer.version_link', { version: status.build.version, build: status.build.commit })
+                    $t('global.footer.version_link', { gitwebUrl: status.build.gitwebUrl, version: status.build.version, build: status.build.commit })
                   )
                 "
               ></span>

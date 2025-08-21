@@ -45,6 +45,7 @@ var (
 	version   = "nightly"
 	commit    = "HEAD"
 	buildTime = "now"
+	gitwebUrl = "https://github.com/sysadminsmedia/homebox"
 )
 
 func build() string {
@@ -53,7 +54,7 @@ func build() string {
 		short = short[:7]
 	}
 
-	return fmt.Sprintf("%s, commit %s, built at %s", version, short, buildTime)
+	return fmt.Sprintf("%s, commit %s at %s, built at %s", version, short, gitwebUrl, buildTime)
 }
 
 func validatePostgresSSLMode(sslMode string) bool {

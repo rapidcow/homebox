@@ -64,6 +64,7 @@ func (a *app) mountRoutes(r *chi.Mux, chain *errchain.ErrChain, repos *repo.AllR
 			Version:   version,
 			Commit:    commit,
 			BuildTime: buildTime,
+			GitwebUrl: gitwebUrl,
 		})))
 
 		r.Get("/currencies", chain.ToHandlerFunc(v1Ctrl.HandleCurrency()))
