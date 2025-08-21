@@ -122,8 +122,8 @@
             },
             "selector": {
                 "no_results": "Nenašli sa žiadne výsledky",
-                "placeholder": "Vybrať...",
-                "search_placeholder": "Zadajte, čo chcete vyhľadať..."
+                "placeholder": "Vybrať…",
+                "search_placeholder": "Zadajte, čo chcete vyhľadať…"
             },
             "view": {
                 "selectable": {
@@ -176,7 +176,7 @@
                 "select_location": "Vyberte miesto"
             },
             "tree": {
-                "no_locations": "Nie sú k dispozícii žiadne miesta. Pridajte nové miesta cez\n `<`span class=\"link-primary\"`>`Vytvoriť`<`/span`>` na navigačnom paneli."
+                "no_locations": "Nie sú k dispozícii žiadne miesta. Pridajte nové miesta kliknutím na\n `<`span class=\"link-primary\"`>`Vytvoriť`<`/span`>` na navigačnej lište."
             }
         },
         "quick_menu": {
@@ -211,7 +211,7 @@
         "items": "Položky",
         "join_discord": "Pripojte sa k Discordu",
         "labels": "Štítky",
-        "loading": "Načítam...",
+        "loading": "Načítam…",
         "locations": "Miesta",
         "maintenance": "Údržba",
         "name": "Názov",
@@ -304,7 +304,7 @@
         "name": "Názov",
         "negate_labels": "Negovať vybrané označenia",
         "next_page": "Ďalšia strana",
-        "no_attachments": "Neboli nájdené žiadne prílohy.",
+        "no_attachments": "Neboli nájdené žiadne prílohy",
         "no_results": "Nenašli sa žiadne položky",
         "notes": "Poznámky",
         "only_with_photo": "Iba položky s fotografiou",
@@ -548,9 +548,9 @@
             "page_top_padding": "Odsadenie strany zvrchu",
             "page_width": "Šírka strany",
             "qr_code_example": "Príklad QR kódu",
-            "tip_1": "",
-            "tip_2": "",
-            "tip_3": "",
+            "tip_1": "Predvolené nastavenia sú nastavené pre\n'<a href=\"https://www.avery.com/templates/5260\">'hárky štítkov Avery 5260'</a>'. Ak používate iný hárok,\nbudete musieť upraviť nastavenia tak, aby zodpovedali vášmu hárku.",
+            "tip_2": "Ak si upravujete hárok, rozmery sú v palcoch. Pri vytváraní hárku 5260 som zistil, že rozmery použité v jeho šablóne nezodpovedali tomu, čo bolo potrebné na tlač v rámci políčok.\n\n„<b>„Buďte pripravení na pokusy a omyly.“</b>“",
+            "tip_3": "Pri tlači nezabudnite:\n'<ol><li>'Nastaviť okraje na 0 alebo Žiadne'</li><li>'Nastaviť mierku na 100 %'</li><li>'Zakázať obojstrannú tlač'</li><li>'Pred tlačou viacerých strán vytlačiť testovaciu stranu'</li></ol>'",
             "tips": "Tipy",
             "title": "Generátor štítkov",
             "toast": {
@@ -562,7 +562,7 @@
         "error": "Počas skenovania sa vyskytla chyba",
         "invalid_url": "Neplatná adresa URL čiarového kódu",
         "no_sources": "Nie sú k dispozícii žiadne zdroje videa",
-        "permission_denied": "",
+        "permission_denied": "Prístup k kamere bol zamietnutý, povoľte prístup k kamere v nastaveniach prehliadača",
         "select_video_source": "Vyberte zdroj videa",
         "title": "Skener",
         "unsupported": "Media Stream API nie je podporované bez protokolu HTTPS"
@@ -573,9 +573,10 @@
             "create_missing_thumbnails": "Vytvoriť chýbajúce náhľady",
             "create_missing_thumbnails_button": "Vytvoriť náhľady",
             "create_missing_thumbnails_confirm": "Naozaj chcete vytvoriť chýbajúce náhľady? Môže to chvíľku trvať a akciu nie je možné pozastaviť.",
-            "ensure_ids": "Zabezpečenie identifikátorov aktív",
+            "create_missing_thumbnails_sub": "Vytvorí miniatúry pre všetky prílohy, ktoré sú podporované aktuálnou konfiguráciou. Toto je užitočné pre prílohy, ktoré boli nahrané pred vydaním Homeboxu v0.20.0. Toto neprepíše existujúce miniatúry, vytvorí nové iba pre prílohy, ktoré nemajú miniatúru. Upozorňujeme, že miniatúry sa vytvárajú na pozadí a ich vytvorenie môže chvíľu trvať.",
+            "ensure_ids": "Zabezpečenie identifikátorov položiek",
             "ensure_ids_button": "Zabezpečenie identifikátorov aktív",
-            "ensure_ids_confirm": "",
+            "ensure_ids_confirm": "Naozaj chcete zabezpečiť, aby všetky prvky mali ID? Môže to chvíľu trvať a nedá sa to vrátiť späť.",
             "ensure_ids_sub": "Zabezpečí, aby všetky položky vo vašom inventári mali platné pole asset_id. To sa dosiahne tak, že sa v databáze zistí najvyššie aktuálne pole asset_id a na každú položku, ktorá nemá nastavené pole asset_id sa použije ďalšia hodnota. Toto sa vykonáva v poradí podľa poľa created_at.",
             "ensure_import_refs": "Zabezpečiť import referencií",
             "ensure_import_refs_button": "Zabezpečiť import referencií",
@@ -603,10 +604,10 @@
         "import_export_sub": "Importujte a exportujte svoj inventár do a zo súboru CSV. To je užitočné pri migrácii inventára do novej inštancie Homeboxu.",
         "reports": "Správy",
         "reports_set": {
-            "asset_labels": "Štítky ID diela",
+            "asset_labels": "Identifikačné štítky položiek",
             "asset_labels_button": "Generátor štítkov",
             "asset_labels_sub": "Generuje tlačiteľné PDF štítkov pre rad Asset ID. Tieto nie sú špecifické pre váš inventár, takže štítky si môžete vytlačiť vopred a aplikovať ich na váš inventár, keď ich dostanete.",
-            "bill_of_materials": "Faktúra za materiály",
+            "bill_of_materials": "Súpis položiek",
             "bill_of_materials_button": "Generovať kusovník",
             "bill_of_materials_sub": "Vygeneruje súbor CSV (Comma Separated Values), ktorý možno importovať do tabuľkového procesora. Toto je súhrn vášho inventára so základnými informáciami o položkách a cenách."
         },
