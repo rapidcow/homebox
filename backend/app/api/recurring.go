@@ -116,7 +116,7 @@ func registerRecurringTasks(app *app, cfg *config.Config, runner *graceful.Runne
 		})
 	}
 
-	if cfg.Options.GithubReleaseCheck {
+	if cfg.Options.CheckGithubRelease {
 		runner.AddPlugin(NewTask("get-latest-github-release", time.Hour, func(ctx context.Context) {
 			log.Debug().Msg("running get latest github release")
 			err := app.services.BackgroundService.GetLatestGithubRelease(context.Background())
