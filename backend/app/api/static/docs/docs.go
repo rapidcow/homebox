@@ -4204,6 +4204,9 @@ const docTemplate = `{
                 "commit": {
                     "type": "string"
                 },
+                "gitwebUrl": {
+                    "type": "string"
+                },
                 "version": {
                     "type": "string"
                 }

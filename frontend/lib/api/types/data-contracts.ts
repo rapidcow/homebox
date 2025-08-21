@@ -868,6 +868,7 @@ export interface Build {
   buildTime: string;
   commit: string;
   version: string;
+  gitwebUrl: string;
 }
 
 export interface ChangePassword {
