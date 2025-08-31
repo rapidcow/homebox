@@ -33,6 +33,12 @@ func setupStorageDir(cfg *config.Config) {
 	}
 }
 
+func postgresQuote(s string) string {
+	s = strings.ReplaceAll(s, `\`, `\\`)
+	s = strings.ReplaceAll(s, `'`, `\'`)
+	return "'" + s + "'"
+}
+
 // setupDatabaseURL returns the database URL and ensures any required directories exist.
 func setupDatabaseURL(cfg *config.Config) string {
 	databaseURL := ""
@@ -45,30 +51,35 @@ func setupDatabaseURL(cfg *config.Config) string {
 			log.Fatal().Err(err).Str("path", dbDir).Msg("failed to create SQLite database directory")
 		}
 	case "postgres":
-		databaseURL = fmt.Sprintf("host=%s port=%s dbname=%s sslmode=%s", cfg.Database.Host, cfg.Database.Port, cfg.Database.Database, cfg.Database.SslMode)
+		databaseURL = fmt.Sprintf("host=%s port=%s dbname=%s sslmode=%s",
+			postgresQuote(cfg.Database.Host),
+			postgresQuote(cfg.Database.Port),
+			postgresQuote(cfg.Database.Database),
+			postgresQuote(cfg.Database.SslMode),
+		)
 		if cfg.Database.Username != "" {
-			databaseURL += fmt.Sprintf(" user=%s", cfg.Database.Username)
+			databaseURL += fmt.Sprintf(" user=%s", postgresQuote(cfg.Database.Username))
 		}
 		if cfg.Database.Password != "" {
-			databaseURL += fmt.Sprintf(" password=%s", cfg.Database.Password)
+			databaseURL += fmt.Sprintf(" password=%s", postgresQuote(cfg.Database.Password))
 		}
 		if cfg.Database.SslRootCert != "" {
 			if _, err := os.Stat(cfg.Database.SslRootCert); err != nil || !os.IsNotExist(err) {
 				log.Fatal().Err(err).Str("path", cfg.Database.SslRootCert).Msg("SSL root certificate file does not accessible")
 			}
-			databaseURL += fmt.Sprintf(" sslrootcert=%s", cfg.Database.SslRootCert)
+			databaseURL += fmt.Sprintf(" sslrootcert=%s", postgresQuote(cfg.Database.SslRootCert))
 		}
 		if cfg.Database.SslCert != "" {
 			if _, err := os.Stat(cfg.Database.SslCert); err != nil || !os.IsNotExist(err) {
 				log.Fatal().Err(err).Str("path", cfg.Database.SslCert).Msg("SSL certificate file does not accessible")
 			}
-			databaseURL += fmt.Sprintf(" sslcert=%s", cfg.Database.SslCert)
+			databaseURL += fmt.Sprintf(" sslcert=%s", postgresQuote(cfg.Database.SslCert))
 		}
 		if cfg.Database.SslKey != "" {
 			if _, err := os.Stat(cfg.Database.SslKey); err != nil || !os.IsNotExist(err) {
 				log.Fatal().Err(err).Str("path", cfg.Database.SslKey).Msg("SSL key file does not accessible")
 			}
-			databaseURL += fmt.Sprintf(" sslkey=%s", cfg.Database.SslKey)
+			databaseURL += fmt.Sprintf(" sslkey=%s", postgresQuote(cfg.Database.SslKey))
 		}
 	default:
 		log.Fatal().Str("driver", cfg.Database.Driver).Msg("unsupported database driver")
