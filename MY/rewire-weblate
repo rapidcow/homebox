@@ -27,7 +27,7 @@ fi
 set -e -x
 
 # Find prefix "version_link": "'<'a href=\"https://github.com/sysadminsmedia/homebox/releases/tag/v{ version }\" target=\"_blank\"'>' (followed by whatever, we don't care)
-perl -Mre=debug -pi -e '
+perl -Mre -pi -e '
 BEGIN { $SQ = "'"'"'" }
 
 s!
