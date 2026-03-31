@@ -1,0 +1,48 @@
+#!/bin/sh
+
+# "Re-branding" Homebox
+# See: e4b6757d563d0e44c51c34efb48826080f79252d
+#
+# To archive the quote:
+#
+# Mary: You could make a card for Georgie. It's his birthday Saturday.
+# Missy: You're right, I need to get him a gift. I should go to the mall.
+# George: You're not going anywhere.
+# Missy: But it's my only brother's 18th birthday.
+# Sheldon: Excuse me.
+# Missy: Fine, it's my favorite brother's 18th birthday.
+# Sheldon: Better.
+
+# Upgrade to Bash if possible; they have nicer string quoting there
+if [ x = "x$BASH_VERSION" ] &&
+	[ -f "$0" -a -r "$0" -a -x "$0" ]
+then
+	if command -v bash >/dev/null 2>&1
+	then
+		exec bash "$0"
+		exit 255
+	fi
+fi
+
+set -e -x
+
+# Find prefix "version_link": "'<'a href=\"https://github.com/sysadminsmedia/homebox/releases/tag/v{ version }\" target=\"_blank\"'>' (followed by whatever, we don't care)
+perl -Mre=debug -pi -e '
+BEGIN { $SQ = "'"'"'" }
+
+s!
+(
+	"version_link":[ ]"$SQ<$SQ a[ ]href=\\"
+)
+	https://github[.]com/sysadminsmedia/homebox/
+	releases/tag/v{[ ]version[ ]}
+(
+	\\"[ ]target=\\"_blank\\"$SQ>$SQ
+)
+
+!
+	$1
+	. "{ gitwebURL }"
+	. $2
+!ex
+' ../frontend/locales/*.json
