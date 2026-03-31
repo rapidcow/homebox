@@ -33,13 +33,16 @@ BEGIN { $SQ = "'"'"'" }
 s!
 (
 	"version_link":[ ]"$SQ<$SQ a[ ]href=\\"
-)
+)(?:
 	https://github[.]com/sysadminsmedia/homebox/
 	releases/tag/v{[ ]version[ ]}
-(
-	\\"[ ]target=\\"_blank\\"$SQ>$SQ
+|
+	"{[ ]gitwebURL[ ]}"
 )
-
+	\\" (?: [ ]target=\\"_blank\\")?
+(
+	$SQ>$SQ
+)
 !
 	$1
 	. "{ gitwebURL }"
