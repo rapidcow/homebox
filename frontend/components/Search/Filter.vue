@@ -8,7 +8,7 @@
     </PopoverTrigger>
     <PopoverContent class="z-40 p-0">
       <div class="p-4 shadow-sm">
-        <Input v-model="search" type="text" placeholder="Search…" />
+        <Input v-model="search" type="text" :placeholder="$t('components.search.filter.search_placeholder')" />
       </div>
       <div class="max-h-72 divide-y overflow-y-auto">
         <Label
@@ -50,13 +50,13 @@
   import { Label } from "@/components/ui/label";
 
   type Props = {
-    label: string;
+    label?: string;
     options: {
       name: string;
       id: string;
       treeString?: string;
     }[];
-    modelValue: {
+    modelValue?: {
       name: string;
       id: string;
       treeString?: string;

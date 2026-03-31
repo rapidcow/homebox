@@ -22,8 +22,8 @@ export type ItemsQuery = {
   page?: number;
   pageSize?: number;
   locations?: string[];
-  labels?: string[];
-  negateLabels?: boolean;
+  tags?: string[];
+  negateTags?: boolean;
   onlyWithoutPhoto?: boolean;
   onlyWithPhoto?: boolean;
   parentIds?: string[];
@@ -153,6 +153,26 @@ export class ItemsApi extends BaseAPI {
     return resp;
   }
 
+  duplicate(
+    id: string,
+    options: {
+      copyMaintenance?: boolean;
+      copyAttachments?: boolean;
+      copyCustomFields?: boolean;
+      copyPrefix?: string;
+    } = {}
+  ) {
+    return this.http.post<typeof options, ItemOut>({
+      url: route(`/items/${id}/duplicate`),
+      body: {
+        copyMaintenance: options.copyMaintenance,
+        copyAttachments: options.copyAttachments,
+        copyCustomFields: options.copyCustomFields,
+        copyPrefix: options.copyPrefix,
+      },
+    });
+  }
+
   import(file: File | Blob) {
     const formData = new FormData();
     formData.append("csv", file);
@@ -163,7 +183,11 @@ export class ItemsApi extends BaseAPI {
     });
   }
 
-  exportURL() {
+  exportURL(tenant?: string) {
+    if (tenant) {
+      return route("/items/export", { tenant });
+    }
+
     return route("/items/export");
   }
 }

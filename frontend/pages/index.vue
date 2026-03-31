@@ -13,7 +13,12 @@
   import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
   import { Button } from "@/components/ui/button";
   import LanguageSelector from "~/components/App/LanguageSelector.vue";
-  import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+  import AppLogo from "~/components/App/Logo.vue";
+  import FormTextField from "~/components/Form/TextField.vue";
+  import FormPassword from "~/components/Form/Password.vue";
+  import FormCheckbox from "~/components/Form/Checkbox.vue";
+  import PasswordScore from "~/components/global/PasswordScore.vue";
 
   const { t } = useI18n();
 
@@ -28,6 +33,12 @@
         const ctx = useAuthContext();
         if (ctx.isAuthorized()) {
           return "/home";
+        } else {
+          console.log("Logged out, clearing collectionId preference");
+          const prefs = useViewPreferences();
+          if (prefs.value.collectionId) {
+            prefs.value.collectionId = null;
+          }
         }
       },
     ],
@@ -36,6 +47,9 @@
   const ctx = useAuthContext();
 
   const api = usePublicApi();
+  // Use ref for OIDC error state management
+  const oidcError = ref<string | null>(null);
+  const shownErrorMessage = ref(false);
 
   const { data: status } = useAsyncData(async () => {
     const { data } = await api.status();
@@ -52,7 +66,26 @@
       email.value = "demo@example.com";
       loginPassword.value = "demo";
     }
+
+    // Auto-redirect to OIDC if autoRedirect is enabled, but not if there's an OIDC initialization error
+    if (status?.oidc?.enabled && status?.oidc?.autoRedirect && !oidcError.value && !shownErrorMessage.value) {
+      loginWithOIDC();
+    }
   });
+
+  const isEvilAccentTheme = useIsThemeInList([
+    "bumblebee",
+    "corporate",
+    "forest",
+    "pastel",
+    "wireframe",
+    "black",
+    "dracula",
+    "autumn",
+    "acid",
+  ]);
+  const isEvilForegroundTheme = useIsThemeInList(["light", "aqua", "fantasy", "autumn", "night"]);
+  const isLofiTheme = useIsThemeInList(["lofi"]);
 
   const route = useRoute();
   const router = useRouter();
@@ -119,6 +152,34 @@
     if (groupToken.value !== "") {
       registerForm.value = true;
     }
+
+    // Handle OIDC error notifications from URL parameters
+    const oidcErrorParam = route.query.oidc_error;
+    if (typeof oidcErrorParam === "string" && oidcErrorParam.startsWith("oidc_")) {
+      // Set the error state to prevent auto-redirect
+      oidcError.value = oidcErrorParam;
+      shownErrorMessage.value = true;
+
+      const translationKey = `index.toast.${oidcErrorParam}`;
+      let errorMessage = t(translationKey);
+
+      // If there are additional details, append them
+      const details = route.query.details;
+      if (typeof details === "string" && details.trim() !== "") {
+        errorMessage += `: ${details}`;
+      }
+
+      toast.error(errorMessage);
+
+      // Clean up the URL by removing the error parameters
+      const newQuery = { ...route.query };
+      delete newQuery.oidc_error;
+      delete newQuery.details;
+      router.replace({ query: newQuery });
+
+      // Clear the error state after showing the message
+      oidcError.value = null;
+    }
   });
 
   const loading = ref(false);
@@ -146,12 +207,16 @@
     loading.value = false;
   }
 
+  function loginWithOIDC() {
+    window.location.href = "/api/v1/users/login/oidc";
+  }
+
   const [registerForm, toggleLogin] = useToggle();
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col">
-    <div class="absolute top-0 -z-10 min-w-full fill-primary">
+  <div class="relative flex min-h-screen flex-col">
+    <div class="pointer-events-none absolute top-0 z-0 min-w-full fill-primary">
       <div class="flex min-h-[20vh] flex-col bg-primary" />
       <svg
         class="fill-primary drop-shadow-xl"
@@ -162,18 +227,32 @@
         <path
           fill-opacity="1"
           d="M0,32L80,69.3C160,107,320,181,480,181.3C640,181,800,107,960,117.3C1120,128,1280,224,1360,272L1440,320L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z"
-        ></path>
+        />
       </svg>
     </div>
-    <div>
-      <header class="mx-auto p-4 text-accent sm:flex sm:items-end sm:p-6 lg:p-14">
+    <div class="relative z-10">
+      <header
+        class="mx-auto p-4 sm:flex sm:items-end sm:p-6 lg:p-14"
+        :class="{
+          'text-accent': !isEvilAccentTheme,
+          'text-white': isLofiTheme,
+        }"
+      >
         <div class="z-10">
           <h2 class="mt-1 flex text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             HomeB
             <AppLogo class="-mb-4 w-12" />
             x
           </h2>
-          <p class="ml-1 text-lg text-foreground">{{ $t("index.tagline") }}</p>
+          <p
+            class="ml-1 text-lg"
+            :class="{
+              'text-foreground': !isEvilForegroundTheme,
+              'text-white': isLofiTheme,
+            }"
+          >
+            {{ $t("index.tagline") }}
+          </p>
         </div>
         <TooltipProvider :delay-duration="0">
           <div class="z-10 ml-auto mt-6 flex items-center gap-4 sm:mt-0">
@@ -261,9 +340,11 @@
                     {{ $t("index.login") }}
                   </CardTitle>
                 </CardHeader>
-                <CardContent class="flex flex-col gap-2">
+                <CardContent v-if="status?.oidc?.allowLocal !== false" class="flex flex-col gap-2">
                   <template v-if="status && status.demo">
-                    <p class="text-center text-xs italic">{{ $t("global.demo_instance") }}</p>
+                    <p class="text-center text-xs italic">
+                      {{ $t("global.demo_instance") }}
+                    </p>
                     <p class="text-center text-xs">
                       <b>{{ $t("global.email") }}</b> demo@example.com
                     </p>
@@ -277,9 +358,34 @@
                     <FormCheckbox v-model="remember" :label="$t('index.remember_me')" />
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button class="w-full" type="submit" :class="loading ? 'loading' : ''" :disabled="loading">
+                <CardFooter class="flex flex-col gap-2">
+                  <Button
+                    v-if="status?.oidc?.allowLocal !== false"
+                    class="w-full"
+                    type="submit"
+                    :class="loading ? 'loading' : ''"
+                    :disabled="loading"
+                  >
                     {{ $t("index.login") }}
+                  </Button>
+
+                  <div
+                    v-if="status?.oidc?.enabled && status?.oidc?.allowLocal !== false"
+                    class="flex w-full items-center gap-2"
+                  >
+                    <hr class="flex-1" />
+                    <span class="text-xs text-muted-foreground">{{ $t("index.or") }}</span>
+                    <hr class="flex-1" />
+                  </div>
+
+                  <Button
+                    v-if="status?.oidc?.enabled"
+                    type="button"
+                    variant="outline"
+                    class="w-full"
+                    @click="loginWithOIDC"
+                  >
+                    {{ status.oidc.buttonText || "Sign in with OIDC" }}
                   </Button>
                 </CardFooter>
               </Card>
@@ -287,7 +393,7 @@
           </Transition>
           <div class="mt-6 text-center">
             <Button
-              v-if="status && status.allowRegistration"
+              v-if="status && status.allowRegistration && status?.oidc?.allowLocal !== false"
               class="group"
               variant="link"
               data-testid="register-button"

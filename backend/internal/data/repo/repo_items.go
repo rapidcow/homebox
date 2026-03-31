@@ -6,21 +6,25 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 	"github.com/sysadminsmedia/homebox/backend/internal/core/services/reporting/eventbus"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/attachment"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/group"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/item"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/itemfield"
-	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/label"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/location"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/maintenanceentry"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/predicate"
+	"github.com/sysadminsmedia/homebox/backend/internal/data/ent/tag"
 	"github.com/sysadminsmedia/homebox/backend/internal/data/types"
 )
 
 type ItemsRepository struct {
-	db  *ent.Client
-	bus *eventbus.EventBus
+	db          *ent.Client
+	bus         *eventbus.EventBus
+	attachments *AttachmentRepo
 }
 
 type (
@@ -35,8 +39,8 @@ type (
 		Search           string       `json:"search"`
 		AssetID          AssetID      `json:"assetId"`
 		LocationIDs      []uuid.UUID  `json:"locationIds"`
-		LabelIDs         []uuid.UUID  `json:"labelIds"`
-		NegateLabels     bool         `json:"negateLabels"`
+		TagIDs           []uuid.UUID  `json:"tagIds"`
+		NegateTags       bool         `json:"negateTags"`
 		OnlyWithoutPhoto bool         `json:"onlyWithoutPhoto"`
 		OnlyWithPhoto    bool         `json:"onlyWithPhoto"`
 		ParentItemIDs    []uuid.UUID  `json:"parentIds"`
@@ -44,6 +48,13 @@ type (
 		IncludeArchived  bool         `json:"includeArchived"`
 		Fields           []FieldQuery `json:"fields"`
 		OrderBy          string       `json:"orderBy"`
+	}
+
+	DuplicateOptions struct {
+		CopyMaintenance  bool   `json:"copyMaintenance"`
+		CopyAttachments  bool   `json:"copyAttachments"`
+		CopyCustomFields bool   `json:"copyCustomFields"`
+		CopyPrefix       string `json:"copyPrefix"`
 	}
 
 	ItemField struct {
@@ -66,7 +77,7 @@ type (
 
 		// Edges
 		LocationID uuid.UUID   `json:"locationId"`
-		LabelIDs   []uuid.UUID `json:"labelIds"`
+		TagIDs     []uuid.UUID `json:"tagIds"`
 	}
 
 	ItemUpdate struct {
@@ -82,7 +93,7 @@ type (
 
 		// Edges
 		LocationID uuid.UUID   `json:"locationId"`
-		LabelIDs   []uuid.UUID `json:"labelIds"`
+		TagIDs     []uuid.UUID `json:"tagIds"`
 
 		// Identifications
 		SerialNumber string `json:"serialNumber"`
@@ -111,9 +122,11 @@ type (
 	}
 
 	ItemPatch struct {
-		ID        uuid.UUID `json:"id"`
-		Quantity  *int      `json:"quantity,omitempty" extensions:"x-nullable,x-omitempty"`
-		ImportRef *string   `json:"-,omitempty"        extensions:"x-nullable,x-omitempty"`
+		ID         uuid.UUID   `json:"id"`
+		Quantity   *int        `json:"quantity,omitempty" extensions:"x-nullable,x-omitempty"`
+		ImportRef  *string     `json:"-,omitempty"        extensions:"x-nullable,x-omitempty"`
+		LocationID uuid.UUID   `json:"locationId"         extensions:"x-nullable,x-omitempty"`
+		TagIDs     []uuid.UUID `json:"tagIds"             extensions:"x-nullable,x-omitempty"`
 	}
 
 	ItemSummary struct {
@@ -132,7 +145,7 @@ type (
 
 		// Edges
 		Location *LocationSummary `json:"location,omitempty" extensions:"x-nullable,x-omitempty"`
-		Labels   []LabelSummary   `json:"labels"`
+		Tags     []TagSummary     `json:"tags"`
 
 		ImageID     *uuid.UUID `json:"imageId,omitempty"     extensions:"x-nullable,x-omitempty"`
 		ThumbnailId *uuid.UUID `json:"thumbnailId,omitempty" extensions:"x-nullable,x-omitempty"`
@@ -184,27 +197,17 @@ func mapItemSummary(item *ent.Item) ItemSummary {
 		location = &loc
 	}
 
-	labels := make([]LabelSummary, len(item.Edges.Label))
-	if item.Edges.Label != nil {
-		labels = mapEach(item.Edges.Label, mapLabelSummary)
-	}
+	tags := lo.Ternary(item.Edges.Tag != nil, mapEach(item.Edges.Tag, mapTagSummary), []TagSummary{})
 
 	var imageID *uuid.UUID
 	var thumbnailID *uuid.UUID
 	if item.Edges.Attachments != nil {
-		for _, a := range item.Edges.Attachments {
-			if a.Primary && a.Type == attachment.TypePhoto {
-				imageID = &a.ID
-				if a.Edges.Thumbnail != nil {
-					if a.Edges.Thumbnail.ID != uuid.Nil {
-						thumbnailID = &a.Edges.Thumbnail.ID
-					} else {
-						thumbnailID = nil
-					}
-				} else {
-					thumbnailID = nil
-				}
-				break
+		if a, ok := lo.Find(item.Edges.Attachments, func(a *ent.Attachment) bool {
+			return a.Primary && a.Type == attachment.TypePhoto
+		}); ok {
+			imageID = &a.ID
+			if a.Edges.Thumbnail != nil && a.Edges.Thumbnail.ID != uuid.Nil {
+				thumbnailID = &a.Edges.Thumbnail.ID
 			}
 		}
 	}
@@ -223,7 +226,7 @@ func mapItemSummary(item *ent.Item) ItemSummary {
 
 		// Edges
 		Location: location,
-		Labels:   labels,
+		Tags:     tags,
 
 		// Warranty
 		Insured:     item.Insured,
@@ -238,9 +241,8 @@ var (
 )
 
 func mapFields(fields []*ent.ItemField) []ItemField {
-	result := make([]ItemField, len(fields))
-	for i, f := range fields {
-		result[i] = ItemField{
+	return lo.Map(fields, func(f *ent.ItemField, _ int) ItemField {
+		return ItemField{
 			ID:           f.ID,
 			Type:         f.Type.String(),
 			Name:         f.Name,
@@ -249,8 +251,7 @@ func mapFields(fields []*ent.ItemField) []ItemField {
 			BooleanValue: f.BooleanValue,
 			// TimeValue:    f.TimeValue,
 		}
-	}
-	return result
+	})
 }
 
 func mapItemOut(item *ent.Item) ItemOut {
@@ -307,18 +308,27 @@ func (e *ItemsRepository) publishMutationEvent(gid uuid.UUID) {
 	}
 }
 
-func (e *ItemsRepository) getOne(ctx context.Context, where ...predicate.Item) (ItemOut, error) {
-	q := e.db.Item.Query().Where(where...)
+func (e *ItemsRepository) getOneTx(ctx context.Context, tx *ent.Tx, where ...predicate.Item) (ItemOut, error) {
+	var q *ent.ItemQuery
+	if tx != nil {
+		q = tx.Item.Query().Where(where...)
+	} else {
+		q = e.db.Item.Query().Where(where...)
+	}
 
 	return mapItemOutErr(q.
 		WithFields().
-		WithLabel().
+		WithTag().
 		WithLocation().
 		WithGroup().
 		WithParent().
 		WithAttachments().
 		Only(ctx),
 	)
+}
+
+func (e *ItemsRepository) getOne(ctx context.Context, where ...predicate.Item) (ItemOut, error) {
+	return e.getOneTx(ctx, nil, where...)
 }
 
 // GetOne returns a single item by ID. If the item does not exist, an error is returned.
@@ -391,24 +401,23 @@ func (e *ItemsRepository) QueryByGroup(ctx context.Context, gid uuid.UUID, q Ite
 	// of filters is OR'd together.
 	//
 	// The goal is to allow matches like where the item has
-	//  - one of the selected labels AND
+	//  - one of the selected tags AND
 	//  - one of the selected locations AND
 	//  - one of the selected fields key/value matches
 	var andPredicates []predicate.Item
 	{
-		if len(q.LabelIDs) > 0 {
-			labelPredicates := make([]predicate.Item, 0, len(q.LabelIDs))
-			for _, l := range q.LabelIDs {
-				if !q.NegateLabels {
-					labelPredicates = append(labelPredicates, item.HasLabelWith(label.ID(l)))
-				} else {
-					labelPredicates = append(labelPredicates, item.Not(item.HasLabelWith(label.ID(l))))
-				}
-			}
-			if !q.NegateLabels {
-				andPredicates = append(andPredicates, item.Or(labelPredicates...))
+		if len(q.TagIDs) > 0 {
+			var tagPredicates []predicate.Item
+			if !q.NegateTags {
+				tagPredicates = lo.Map(q.TagIDs, func(l uuid.UUID, _ int) predicate.Item {
+					return item.HasTagWith(tag.ID(l))
+				})
+				andPredicates = append(andPredicates, item.Or(tagPredicates...))
 			} else {
-				andPredicates = append(andPredicates, item.And(labelPredicates...))
+				tagPredicates = lo.Map(q.TagIDs, func(l uuid.UUID, _ int) predicate.Item {
+					return item.Not(item.HasTagWith(tag.ID(l)))
+				})
+				andPredicates = append(andPredicates, item.And(tagPredicates...))
 			}
 		}
 
@@ -434,24 +443,22 @@ func (e *ItemsRepository) QueryByGroup(ctx context.Context, gid uuid.UUID, q Ite
 		}
 
 		if len(q.LocationIDs) > 0 {
-			locationPredicates := make([]predicate.Item, 0, len(q.LocationIDs))
-			for _, l := range q.LocationIDs {
-				locationPredicates = append(locationPredicates, item.HasLocationWith(location.ID(l)))
-			}
+			locationPredicates := lo.Map(q.LocationIDs, func(l uuid.UUID, _ int) predicate.Item {
+				return item.HasLocationWith(location.ID(l))
+			})
 
 			andPredicates = append(andPredicates, item.Or(locationPredicates...))
 		}
 
 		if len(q.Fields) > 0 {
-			fieldPredicates := make([]predicate.Item, 0, len(q.Fields))
-			for _, f := range q.Fields {
-				fieldPredicates = append(fieldPredicates, item.HasFieldsWith(
+			fieldPredicates := lo.Map(q.Fields, func(f FieldQuery, _ int) predicate.Item {
+				return item.HasFieldsWith(
 					itemfield.And(
 						itemfield.Name(f.Name),
 						itemfield.TextValue(f.Value),
 					),
-				))
-			}
+				)
+			})
 
 			andPredicates = append(andPredicates, item.Or(fieldPredicates...))
 		}
@@ -483,7 +490,7 @@ func (e *ItemsRepository) QueryByGroup(ctx context.Context, gid uuid.UUID, q Ite
 	}
 
 	qb = qb.
-		WithLabel().
+		WithTag().
 		WithLocation().
 		WithAttachments(func(aq *ent.AttachmentQuery) {
 			aq.Where(
@@ -528,7 +535,7 @@ func (e *ItemsRepository) QueryByAssetID(ctx context.Context, gid uuid.UUID, ass
 
 	items, err := mapItemsSummaryErr(
 		qb.Order(ent.Asc(item.FieldName)).
-			WithLabel().
+			WithTag().
 			WithLocation().
 			All(ctx),
 	)
@@ -544,11 +551,11 @@ func (e *ItemsRepository) QueryByAssetID(ctx context.Context, gid uuid.UUID, ass
 	}, nil
 }
 
-// GetAll returns all the items in the database with the Labels and Locations eager loaded.
+// GetAll returns all the items in the database with the Tags and Locations eager loaded.
 func (e *ItemsRepository) GetAll(ctx context.Context, gid uuid.UUID) ([]ItemOut, error) {
 	return mapItemsOutErr(e.db.Item.Query().
 		Where(item.HasGroupWith(group.ID(gid))).
-		WithLabel().
+		WithTag().
 		WithLocation().
 		WithFields().
 		All(ctx))
@@ -565,12 +572,21 @@ func (e *ItemsRepository) GetAllZeroAssetID(ctx context.Context, gid uuid.UUID) 
 	return mapItemsSummaryErr(q.All(ctx))
 }
 
-func (e *ItemsRepository) GetHighestAssetID(ctx context.Context, gid uuid.UUID) (AssetID, error) {
-	q := e.db.Item.Query().Where(
-		item.HasGroupWith(group.ID(gid)),
-	).Order(
-		ent.Desc(item.FieldAssetID),
-	).Limit(1)
+func (e *ItemsRepository) GetHighestAssetIDTx(ctx context.Context, tx *ent.Tx, gid uuid.UUID) (AssetID, error) {
+	var q *ent.ItemQuery
+	if tx != nil {
+		q = tx.Item.Query().Where(
+			item.HasGroupWith(group.ID(gid)),
+		).Order(
+			ent.Desc(item.FieldAssetID),
+		).Limit(1)
+	} else {
+		q = e.db.Item.Query().Where(
+			item.HasGroupWith(group.ID(gid)),
+		).Order(
+			ent.Desc(item.FieldAssetID),
+		).Limit(1)
+	}
 
 	result, err := q.First(ctx)
 	if err != nil {
@@ -581,6 +597,10 @@ func (e *ItemsRepository) GetHighestAssetID(ctx context.Context, gid uuid.UUID) 
 	}
 
 	return AssetID(result.AssetID), nil
+}
+
+func (e *ItemsRepository) GetHighestAssetID(ctx context.Context, gid uuid.UUID) (AssetID, error) {
+	return e.GetHighestAssetIDTx(ctx, nil, gid)
 }
 
 func (e *ItemsRepository) SetAssetID(ctx context.Context, gid uuid.UUID, id uuid.UUID, assetID AssetID) error {
@@ -607,8 +627,8 @@ func (e *ItemsRepository) Create(ctx context.Context, gid uuid.UUID, data ItemCr
 		q.SetParentID(data.ParentID)
 	}
 
-	if len(data.LabelIDs) > 0 {
-		q.AddLabelIDs(data.LabelIDs...)
+	if len(data.TagIDs) > 0 {
+		q.AddTagIDs(data.TagIDs...)
 	}
 
 	result, err := q.Save(ctx)
@@ -620,8 +640,117 @@ func (e *ItemsRepository) Create(ctx context.Context, gid uuid.UUID, data ItemCr
 	return e.GetOne(ctx, result.ID)
 }
 
+// ItemCreateFromTemplate contains all data needed to create an item from a template.
+type ItemCreateFromTemplate struct {
+	Name             string
+	Description      string
+	Quantity         int
+	LocationID       uuid.UUID
+	TagIDs           []uuid.UUID
+	Insured          bool
+	Manufacturer     string
+	ModelNumber      string
+	LifetimeWarranty bool
+	WarrantyDetails  string
+	Fields           []ItemField
+}
+
+// CreateFromTemplate creates an item with all template data in a single transaction.
+func (e *ItemsRepository) CreateFromTemplate(ctx context.Context, gid uuid.UUID, data ItemCreateFromTemplate) (ItemOut, error) {
+	tx, err := e.db.Tx(ctx)
+	if err != nil {
+		return ItemOut{}, err
+	}
+	committed := false
+	defer func() {
+		if !committed {
+			if err := tx.Rollback(); err != nil {
+				log.Warn().Err(err).Msg("failed to rollback transaction during template item creation")
+			}
+		}
+	}()
+
+	// Get next asset ID within transaction
+	nextAssetID, err := e.GetHighestAssetIDTx(ctx, tx, gid)
+	if err != nil {
+		return ItemOut{}, err
+	}
+	nextAssetID++
+
+	// Create item with all template data
+	newItemID := uuid.New()
+	itemBuilder := tx.Item.Create().
+		SetID(newItemID).
+		SetName(data.Name).
+		SetDescription(data.Description).
+		SetQuantity(data.Quantity).
+		SetLocationID(data.LocationID).
+		SetGroupID(gid).
+		SetAssetID(int(nextAssetID)).
+		SetInsured(data.Insured).
+		SetManufacturer(data.Manufacturer).
+		SetModelNumber(data.ModelNumber).
+		SetLifetimeWarranty(data.LifetimeWarranty).
+		SetWarrantyDetails(data.WarrantyDetails)
+
+	if len(data.TagIDs) > 0 {
+		itemBuilder.AddTagIDs(data.TagIDs...)
+	}
+
+	_, err = itemBuilder.Save(ctx)
+	if err != nil {
+		return ItemOut{}, err
+	}
+
+	// Create custom fields
+	for _, field := range data.Fields {
+		_, err = tx.ItemField.Create().
+			SetItemID(newItemID).
+			SetType(itemfield.Type(field.Type)).
+			SetName(field.Name).
+			SetTextValue(field.TextValue).
+			Save(ctx)
+		if err != nil {
+			return ItemOut{}, fmt.Errorf("failed to create field %s: %w", field.Name, err)
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return ItemOut{}, err
+	}
+	committed = true
+
+	e.publishMutationEvent(gid)
+	return e.GetOne(ctx, newItemID)
+}
+
 func (e *ItemsRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	err := e.db.Item.DeleteOneID(id).Exec(ctx)
+	// Get the item with its group and attachments before deletion
+	itm, err := e.db.Item.Query().
+		Where(item.ID(id)).
+		WithGroup().
+		WithAttachments().
+		Only(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Get the group ID for attachment deletion
+	var gid uuid.UUID
+	if itm.Edges.Group != nil {
+		gid = itm.Edges.Group.ID
+	}
+
+	// Delete all attachments (and their files) before deleting the item
+	for _, att := range itm.Edges.Attachments {
+		err := e.attachments.Delete(ctx, gid, att.ID)
+		if err != nil {
+			log.Err(err).Str("attachment_id", att.ID.String()).Msg("failed to delete attachment during item deletion")
+			// Continue with other attachments even if one fails
+		}
+	}
+
+	err = e.db.Item.DeleteOneID(id).Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -631,7 +760,28 @@ func (e *ItemsRepository) Delete(ctx context.Context, id uuid.UUID) error {
 }
 
 func (e *ItemsRepository) DeleteByGroup(ctx context.Context, gid, id uuid.UUID) error {
-	_, err := e.db.Item.
+	// Get the item with its attachments before deletion
+	itm, err := e.db.Item.Query().
+		Where(
+			item.ID(id),
+			item.HasGroupWith(group.ID(gid)),
+		).
+		WithAttachments().
+		Only(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Delete all attachments (and their files) before deleting the item
+	for _, att := range itm.Edges.Attachments {
+		err := e.attachments.Delete(ctx, gid, att.ID)
+		if err != nil {
+			log.Err(err).Str("attachment_id", att.ID.String()).Msg("failed to delete attachment during item deletion")
+			// Continue with other attachments even if one fails
+		}
+	}
+
+	_, err = e.db.Item.
 		Delete().
 		Where(
 			item.ID(id),
@@ -643,6 +793,88 @@ func (e *ItemsRepository) DeleteByGroup(ctx context.Context, gid, id uuid.UUID) 
 
 	e.publishMutationEvent(gid)
 	return err
+}
+
+func (e *ItemsRepository) WipeInventory(ctx context.Context, gid uuid.UUID, wipeTags bool, wipeLocations bool, wipeMaintenance bool) (int, error) {
+	deleted := 0
+
+	// Wipe maintenance records if requested
+	// IMPORTANT: Must delete maintenance records BEFORE items since they are linked to items
+	if wipeMaintenance {
+		maintenanceCount, err := e.db.MaintenanceEntry.Delete().
+			Where(maintenanceentry.HasItemWith(item.HasGroupWith(group.ID(gid)))).
+			Exec(ctx)
+		if err != nil {
+			log.Err(err).Msg("failed to delete maintenance entries during wipe inventory")
+		} else {
+			log.Info().Int("count", maintenanceCount).Msg("deleted maintenance entries during wipe inventory")
+			deleted += maintenanceCount
+		}
+	}
+
+	// Get all items for the group
+	items, err := e.db.Item.Query().
+		Where(item.HasGroupWith(group.ID(gid))).
+		WithAttachments().
+		All(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	// Delete each item with its attachments
+	// Note: We manually delete attachments and items instead of calling DeleteByGroup
+	// to continue processing remaining items even if some deletions fail
+	for _, itm := range items {
+		// Delete all attachments first
+		for _, att := range itm.Edges.Attachments {
+			err := e.attachments.Delete(ctx, gid, att.ID)
+			if err != nil {
+				log.Err(err).Str("attachment_id", att.ID.String()).Msg("failed to delete attachment during wipe inventory")
+				// Continue with other attachments even if one fails
+			}
+		}
+
+		// Delete the item
+		_, err = e.db.Item.
+			Delete().
+			Where(
+				item.ID(itm.ID),
+				item.HasGroupWith(group.ID(gid)),
+			).Exec(ctx)
+		if err != nil {
+			log.Err(err).Str("item_id", itm.ID.String()).Msg("failed to delete item during wipe inventory")
+			// Skip to next item without incrementing counter
+			continue
+		}
+
+		// Only increment counter if deletion succeeded
+		deleted++
+	}
+
+	// Wipe tags if requested
+	if wipeTags {
+		tagCount, err := e.db.Tag.Delete().Where(tag.HasGroupWith(group.ID(gid))).Exec(ctx)
+		if err != nil {
+			log.Err(err).Msg("failed to delete tags during wipe inventory")
+		} else {
+			log.Info().Int("count", tagCount).Msg("deleted tags during wipe inventory")
+			deleted += tagCount
+		}
+	}
+
+	// Wipe locations if requested
+	if wipeLocations {
+		locationCount, err := e.db.Location.Delete().Where(location.HasGroupWith(group.ID(gid))).Exec(ctx)
+		if err != nil {
+			log.Err(err).Msg("failed to delete locations during wipe inventory")
+		} else {
+			log.Info().Int("count", locationCount).Msg("deleted locations during wipe inventory")
+			deleted += locationCount
+		}
+	}
+
+	e.publishMutationEvent(gid)
+	return deleted, nil
 }
 
 func (e *ItemsRepository) UpdateByGroup(ctx context.Context, gid uuid.UUID, data ItemUpdate) (ItemOut, error) {
@@ -670,23 +902,23 @@ func (e *ItemsRepository) UpdateByGroup(ctx context.Context, gid uuid.UUID, data
 		SetAssetID(int(data.AssetID)).
 		SetSyncChildItemsLocations(data.SyncChildItemsLocations)
 
-	currentLabels, err := e.db.Item.Query().Where(item.ID(data.ID)).QueryLabel().All(ctx)
+	currentTags, err := e.db.Item.Query().Where(item.ID(data.ID)).QueryTag().All(ctx)
 	if err != nil {
 		return ItemOut{}, err
 	}
 
-	set := newIDSet(currentLabels)
+	set := newIDSet(currentTags)
 
-	for _, l := range data.LabelIDs {
+	for _, l := range data.TagIDs {
 		if set.Contains(l) {
 			set.Remove(l)
 			continue
 		}
-		q.AddLabelIDs(l)
+		q.AddTagIDs(l)
 	}
 
 	if set.Len() > 0 {
-		q.RemoveLabelIDs(set.Slice()...)
+		q.RemoveTagIDs(set.Slice()...)
 	}
 
 	if data.ParentID != uuid.Nil {
@@ -805,7 +1037,20 @@ func (e *ItemsRepository) GetAllZeroImportRef(ctx context.Context, gid uuid.UUID
 }
 
 func (e *ItemsRepository) Patch(ctx context.Context, gid, id uuid.UUID, data ItemPatch) error {
-	q := e.db.Item.Update().
+	tx, err := e.db.Tx(ctx)
+	if err != nil {
+		return err
+	}
+	committed := false
+	defer func() {
+		if !committed {
+			if err := tx.Rollback(); err != nil {
+				log.Warn().Err(err).Msg("failed to rollback transaction during item patch")
+			}
+		}
+	}()
+
+	q := tx.Item.Update().
 		Where(
 			item.ID(id),
 			item.HasGroupWith(group.ID(gid)),
@@ -819,8 +1064,81 @@ func (e *ItemsRepository) Patch(ctx context.Context, gid, id uuid.UUID, data Ite
 		q.SetQuantity(*data.Quantity)
 	}
 
+	if data.LocationID != uuid.Nil {
+		q.SetLocationID(data.LocationID)
+	}
+
+	err = q.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	if data.TagIDs != nil {
+		currentTags, err := tx.Item.Query().Where(item.ID(id), item.HasGroupWith(group.ID(gid))).QueryTag().All(ctx)
+		if err != nil {
+			return err
+		}
+		set := newIDSet(currentTags)
+
+		addTags := []uuid.UUID{}
+		for _, l := range data.TagIDs {
+			if set.Contains(l) {
+				set.Remove(l)
+			} else {
+				addTags = append(addTags, l)
+			}
+		}
+
+		if len(addTags) > 0 {
+			if err := tx.Item.Update().
+				Where(item.ID(id), item.HasGroupWith(group.ID(gid))).
+				AddTagIDs(addTags...).
+				Exec(ctx); err != nil {
+				return err
+			}
+		}
+		if set.Len() > 0 {
+			if err := tx.Item.Update().
+				Where(item.ID(id), item.HasGroupWith(group.ID(gid))).
+				RemoveTagIDs(set.Slice()...).
+				Exec(ctx); err != nil {
+				return err
+			}
+		}
+	}
+
+	if data.LocationID != uuid.Nil {
+		itemEnt, err := tx.Item.Query().Where(item.ID(id), item.HasGroupWith(group.ID(gid))).Only(ctx)
+		if err != nil {
+			return err
+		}
+		if itemEnt.SyncChildItemsLocations {
+			children, err := tx.Item.Query().Where(item.ID(id), item.HasGroupWith(group.ID(gid))).QueryChildren().All(ctx)
+			if err != nil {
+				return err
+			}
+			for _, child := range children {
+				childLocation, err := child.QueryLocation().First(ctx)
+				if err != nil {
+					return err
+				}
+				if data.LocationID != childLocation.ID {
+					err = child.Update().SetLocationID(data.LocationID).Exec(ctx)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	committed = true
+
 	e.publishMutationEvent(gid)
-	return q.Exec(ctx)
+	return nil
 }
 
 func (e *ItemsRepository) GetAllCustomFieldValues(ctx context.Context, gid uuid.UUID, name string) ([]string, error) {
@@ -845,10 +1163,9 @@ func (e *ItemsRepository) GetAllCustomFieldValues(ctx context.Context, gid uuid.
 		return nil, fmt.Errorf("failed to get field values: %w", err)
 	}
 
-	valueStrings := make([]string, len(values))
-	for i, f := range values {
-		valueStrings[i] = f.Value
-	}
+	valueStrings := lo.Map(values, func(f st, _ int) string {
+		return f.Value
+	})
 
 	return valueStrings, nil
 }
@@ -872,10 +1189,9 @@ func (e *ItemsRepository) GetAllCustomFieldNames(ctx context.Context, gid uuid.U
 		return nil, fmt.Errorf("failed to get custom fields: %w", err)
 	}
 
-	fieldNames := make([]string, len(fields))
-	for i, f := range fields {
-		fieldNames[i] = f.Name
-	}
+	fieldNames := lo.Map(fields, func(f st, _ int) string {
+		return f.Name
+	})
 
 	return fieldNames, nil
 }
@@ -1003,4 +1319,164 @@ func (e *ItemsRepository) SetPrimaryPhotos(ctx context.Context, gid uuid.UUID) (
 	}
 
 	return updated, nil
+}
+
+// Duplicate creates a copy of an item with configurable options for what data to copy.
+// The new item will have the next available asset ID and a customizable prefix in the name.
+func (e *ItemsRepository) Duplicate(ctx context.Context, gid, id uuid.UUID, options DuplicateOptions) (ItemOut, error) {
+	tx, err := e.db.Tx(ctx)
+	if err != nil {
+		return ItemOut{}, err
+	}
+	committed := false
+	defer func() {
+		if !committed {
+			if err := tx.Rollback(); err != nil {
+				log.Warn().Err(err).Msg("failed to rollback transaction during item duplication")
+			}
+		}
+	}()
+
+	// Get the original item with all its data
+	originalItem, err := e.getOneTx(ctx, tx, item.ID(id), item.HasGroupWith(group.ID(gid)))
+	if err != nil {
+		return ItemOut{}, err
+	}
+
+	nextAssetID, err := e.GetHighestAssetIDTx(ctx, tx, gid)
+	if err != nil {
+		return ItemOut{}, err
+	}
+	nextAssetID++
+
+	// Set default copy prefix if not provided
+	if options.CopyPrefix == "" {
+		options.CopyPrefix = "Copy of "
+	}
+
+	// Create the new item directly in the transaction
+	newItemID := uuid.New()
+	itemBuilder := tx.Item.Create().
+		SetID(newItemID).
+		SetName(options.CopyPrefix + originalItem.Name).
+		SetDescription(originalItem.Description).
+		SetQuantity(originalItem.Quantity).
+		SetLocationID(originalItem.Location.ID).
+		SetGroupID(gid).
+		SetAssetID(int(nextAssetID)).
+		SetSerialNumber(originalItem.SerialNumber).
+		SetModelNumber(originalItem.ModelNumber).
+		SetManufacturer(originalItem.Manufacturer).
+		SetLifetimeWarranty(originalItem.LifetimeWarranty).
+		SetWarrantyExpires(originalItem.WarrantyExpires.Time()).
+		SetWarrantyDetails(originalItem.WarrantyDetails).
+		SetPurchaseTime(originalItem.PurchaseTime.Time()).
+		SetPurchaseFrom(originalItem.PurchaseFrom).
+		SetPurchasePrice(originalItem.PurchasePrice).
+		SetSoldTime(originalItem.SoldTime.Time()).
+		SetSoldTo(originalItem.SoldTo).
+		SetSoldPrice(originalItem.SoldPrice).
+		SetSoldNotes(originalItem.SoldNotes).
+		SetNotes(originalItem.Notes).
+		SetInsured(originalItem.Insured).
+		SetArchived(originalItem.Archived).
+		SetSyncChildItemsLocations(originalItem.SyncChildItemsLocations)
+
+	if originalItem.Parent != nil {
+		itemBuilder.SetParentID(originalItem.Parent.ID)
+	}
+
+	// Add tags
+	if len(originalItem.Tags) > 0 {
+		tagIDs := lo.Map(originalItem.Tags, func(tag TagSummary, _ int) uuid.UUID {
+			return tag.ID
+		})
+		itemBuilder.AddTagIDs(tagIDs...)
+	}
+
+	_, err = itemBuilder.Save(ctx)
+	if err != nil {
+		return ItemOut{}, err
+	}
+
+	// Copy custom fields if requested
+	if options.CopyCustomFields {
+		for _, field := range originalItem.Fields {
+			_, err = tx.ItemField.Create().
+				SetItemID(newItemID).
+				SetType(itemfield.Type(field.Type)).
+				SetName(field.Name).
+				SetTextValue(field.TextValue).
+				SetNumberValue(field.NumberValue).
+				SetBooleanValue(field.BooleanValue).
+				Save(ctx)
+			if err != nil {
+				log.Warn().Err(err).Str("field_name", field.Name).Msg("failed to copy custom field during duplication")
+				continue
+			}
+		}
+	}
+
+	// Copy attachments if requested
+	if options.CopyAttachments {
+		for _, att := range originalItem.Attachments {
+			// Get the original attachment file
+			originalAttachment, err := tx.Attachment.Query().
+				Where(attachment.ID(att.ID)).
+				Only(ctx)
+			if err != nil {
+				// Log error but continue to copy other attachments
+				log.Warn().Err(err).Str("attachment_id", att.ID.String()).Msg("failed to find attachment during duplication")
+				continue
+			}
+
+			// Create a copy of the attachment with the same file path
+			// Since files are stored with hash-based paths, this is safe
+			_, err = tx.Attachment.Create().
+				SetItemID(newItemID).
+				SetType(originalAttachment.Type).
+				SetTitle(originalAttachment.Title).
+				SetPath(originalAttachment.Path).
+				SetMimeType(originalAttachment.MimeType).
+				SetPrimary(originalAttachment.Primary).
+				Save(ctx)
+			if err != nil {
+				log.Warn().Err(err).Str("original_attachment_id", att.ID.String()).Msg("failed to copy attachment during duplication")
+				continue
+			}
+		}
+	}
+
+	// Copy maintenance entries if requested
+	if options.CopyMaintenance {
+		maintenanceEntries, err := tx.MaintenanceEntry.Query().
+			Where(maintenanceentry.HasItemWith(item.ID(id))).
+			All(ctx)
+		if err == nil {
+			for _, entry := range maintenanceEntries {
+				_, err = tx.MaintenanceEntry.Create().
+					SetItemID(newItemID).
+					SetDate(entry.Date).
+					SetScheduledDate(entry.ScheduledDate).
+					SetName(entry.Name).
+					SetDescription(entry.Description).
+					SetCost(entry.Cost).
+					Save(ctx)
+				if err != nil {
+					log.Warn().Err(err).Str("maintenance_entry_id", entry.ID.String()).Msg("failed to copy maintenance entry during duplication")
+					continue
+				}
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return ItemOut{}, err
+	}
+	committed = true
+
+	e.publishMutationEvent(gid)
+
+	// Get the final item with all copied data
+	return e.GetOne(ctx, newItemID)
 }

@@ -6,13 +6,17 @@
     up the tree
     -->
     <ModalConfirm />
-    <AppOutdatedModal v-if="status" :status="status" />
+    <OutdatedModal v-if="status" :status="status" />
     <ItemCreateModal />
-    <LabelCreateModal />
+    <WipeInventoryDialog />
+    <TagCreateModal />
     <LocationCreateModal />
     <ItemBarcodeModal />
     <AppQuickMenuModal :actions="quickMenuActions" />
     <AppScannerModal />
+    <CollectionCreateModal />
+    <CollectionJoinModal />
+    <CollectionInviteCreateModal />
     <SidebarProvider :default-open="sidebarState">
       <Sidebar collapsible="icon">
         <SidebarHeader class="items-center">
@@ -24,10 +28,13 @@
               <AppLogo />
             </div>
           </NuxtLink>
+
+          <CollectionSelector />
+
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <SidebarMenuButton
-                class="flex justify-center bg-primary text-primary-foreground shadow hover:bg-primary/90 group-data-[collapsible=icon]:justify-start"
+                class="flex justify-center bg-primary text-primary-foreground drop-shadow-md hover:bg-primary/90 active:bg-primary/90 active:text-primary-foreground group-data-[collapsible=icon]:justify-start"
                 :tooltip="$t('global.create')"
                 hotkey="Shortcut: Ctrl+`"
               >
@@ -42,12 +49,12 @@
                 v-for="btn in dropdown"
                 :key="btn.id"
                 class="group cursor-pointer text-lg"
-                @click="openDialog(btn.dialogId)"
+                @click="openDialog(btn.dialogId as NoParamDialogIDs)"
               >
                 {{ btn.name.value }}
                 <Shortcut
                   v-if="btn.shortcut"
-                  class="ml-auto hidden group-hover:inline"
+                  class="invisible ml-auto group-hover:visible"
                   :keys="btn.shortcut.replace('Shift', '⇧').split('+')"
                 />
               </DropdownMenuItem>
@@ -58,19 +65,63 @@
         <SidebarContent>
           <SidebarGroup>
             <SidebarMenu>
-              <SidebarMenuItem v-for="n in nav" :key="n.id">
-                <SidebarMenuLink
-                  :href="n.to"
-                  :class="{
-                    'bg-accent text-accent-foreground': n.active?.value,
-                    'text-nowrap': typeof locale === 'string' && locale.startsWith('zh-'),
-                  }"
-                  :tooltip="n.name.value"
-                >
-                  <component :is="n.icon" />
-                  <span>{{ n.name.value }}</span>
-                </SidebarMenuLink>
-              </SidebarMenuItem>
+              <template v-for="n in nav" :key="n.id">
+                <SidebarMenuItem v-if="!n.collapsible" :key="n.id">
+                  <SidebarMenuLink
+                    :href="n.to"
+                    :class="{
+                      'bg-accent text-accent-foreground': n.active?.value,
+                      'text-nowrap': typeof locale === 'string' && locale.startsWith('zh-'),
+                    }"
+                    :tooltip="n.name.value"
+                  >
+                    <component :is="n.icon" />
+                    <span>{{ n.name.value }}</span>
+                  </SidebarMenuLink>
+                </SidebarMenuItem>
+
+                <Collapsible v-else default-open class="group/collapsible">
+                  <SidebarMenuItem>
+                    <SidebarMenuItem class="flex gap-1">
+                      <SidebarMenuLink
+                        :href="n.to"
+                        :class="{
+                          'bg-accent text-accent-foreground': n.active?.value,
+                          'text-nowrap': typeof locale === 'string' && locale.startsWith('zh-'),
+                        }"
+                        :tooltip="n.name.value"
+                      >
+                        <component :is="n.icon" />
+                        <span>{{ n.name.value }}</span>
+                      </SidebarMenuLink>
+                      <CollapsibleTrigger as-child>
+                        <SidebarMenuButton class="flex size-12 items-center justify-center">
+                          <MdiChevronRight
+                            class="transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                          />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                    </SidebarMenuItem>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem v-for="c in n.collapsible" :key="c.id">
+                          <SidebarMenuLink
+                            :href="c.to"
+                            :class="{
+                              'bg-accent text-accent-foreground': c.active?.value,
+                              'text-nowrap': typeof locale === 'string' && locale.startsWith('zh-'),
+                              'h-min py-0': true,
+                            }"
+                            :tooltip="c.name.value"
+                          >
+                            <span>{{ c.name.value }}</span>
+                          </SidebarMenuLink>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              </template>
 
               <!-- makes scanner accessible easily if using legacy header -->
               <SidebarMenuItem v-if="preferences.displayLegacyHeader">
@@ -105,7 +156,7 @@
 
         <SidebarRail />
       </Sidebar>
-      <SidebarInset class="min-h-dvh bg-background-accent">
+      <SidebarInset class="min-h-dvh max-w-full overflow-hidden bg-background-accent">
         <div class="relative flex h-full flex-col justify-center">
           <div v-if="preferences.displayLegacyHeader">
             <AppHeaderDecor class="-mt-10 hidden lg:block" />
@@ -124,7 +175,7 @@
                 <AppHeaderText class="h-6" />
               </NuxtLink>
             </div>
-            <div class="sm:grow"></div>
+            <div class="sm:grow" />
             <div class="flex h-1/2 grow items-center justify-end gap-2 sm:h-auto">
               <Input
                 v-model:model-value="search"
@@ -146,20 +197,23 @@
             </div>
           </div>
 
-          <slot></slot>
-          <div class="grow"></div>
+          <slot />
+          <div class="grow" />
 
           <footer v-if="status" class="bottom-0 w-full pb-4 text-center">
             <p class="text-center text-sm">
               <span
                 v-html="
                   DOMPurify.sanitize(
-                    $t('global.footer.version_link', { gitwebUrl: status.build.gitwebUrl, version: status.build.version, build: status.build.commit })
+                    $t('global.footer.version_link', {
+                      version: status.build.version.replace(/^v/, ''),
+                      build: status.build.commit,
+                    })
                   )
                 "
-              ></span>
+              />
               ~
-              <span v-html="DOMPurify.sanitize($t('global.footer.api_link'))"></span>
+              <span v-html="DOMPurify.sanitize($t('global.footer.api_link'))" />
             </p>
           </footer>
         </div>
@@ -171,7 +225,7 @@
 <script lang="ts" setup>
   import { useI18n } from "vue-i18n";
   import DOMPurify from "dompurify";
-  import { useLabelStore } from "~~/stores/labels";
+  import { useTagStore } from "~/stores/tags";
   import { useLocationStore } from "~~/stores/locations";
 
   import MdiHome from "~icons/mdi/home";
@@ -183,21 +237,26 @@
   import MdiWrench from "~icons/mdi/wrench";
   import MdiPlus from "~icons/mdi/plus";
   import MdiLogout from "~icons/mdi/logout";
+  import MdiFileDocumentMultiple from "~icons/mdi/file-document-multiple";
+  import MdiChevronRight from "~icons/mdi/chevron-right";
 
   import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarHeader,
-    SidebarInset,
-    SidebarRail,
-    SidebarTrigger,
     SidebarGroup,
     SidebarGroupLabel,
+    SidebarHeader,
+    SidebarInset,
     SidebarMenu,
-    SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubItem,
     SidebarMenuButton,
+    SidebarMenuItem,
     SidebarMenuLink,
+    SidebarProvider,
+    SidebarRail,
+    SidebarTrigger,
   } from "@/components/ui/sidebar";
   import {
     DropdownMenu,
@@ -205,12 +264,30 @@
     DropdownMenuItem,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu";
+  import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
   import { Shortcut } from "~/components/ui/shortcut";
   import { useDialog } from "~/components/ui/dialog-provider";
   import { Input } from "~/components/ui/input";
   import { Button } from "~/components/ui/button";
   import { toast } from "@/components/ui/sonner";
-  import { DialogID } from "~/components/ui/dialog-provider/utils";
+  import { DialogID, type NoParamDialogIDs, type OptionalDialogIDs } from "~/components/ui/dialog-provider/utils";
+  import ModalConfirm from "~/components/ModalConfirm.vue";
+  import OutdatedModal from "~/components/App/OutdatedModal.vue";
+  import ItemCreateModal from "~/components/Item/CreateModal.vue";
+  import WipeInventoryDialog from "~/components/WipeInventoryDialog.vue";
+
+  import TagCreateModal from "~/components/Tag/CreateModal.vue";
+  import LocationCreateModal from "~/components/Location/CreateModal.vue";
+  import ItemBarcodeModal from "~/components/Item/BarcodeModal.vue";
+  import AppQuickMenuModal from "~/components/App/QuickMenuModal.vue";
+  import AppScannerModal from "~/components/App/ScannerModal.vue";
+  import AppLogo from "~/components/App/Logo.vue";
+  import AppHeaderDecor from "~/components/App/HeaderDecor.vue";
+  import AppHeaderText from "~/components/App/HeaderText.vue";
+  import CollectionSelector from "~/components/Collection/Selector.vue";
+  import CollectionCreateModal from "~/components/Collection/CreateModal.vue";
+  import CollectionJoinModal from "~/components/Collection/JoinModal.vue";
+  import CollectionInviteCreateModal from "~/components/Collection/InviteCreateModal.vue";
 
   const { t, locale } = useI18n();
   const username = computed(() => authCtx.user?.name || "User");
@@ -269,7 +346,7 @@
     id: number;
     name: ComputedRef<string>;
     shortcut: string;
-    dialogId: DialogID;
+    dialogId: NoParamDialogIDs | OptionalDialogIDs;
   };
 
   const dropdown: DropdownItem[] = [
@@ -287,15 +364,27 @@
     },
     {
       id: 2,
-      name: computed(() => t("menu.create_label")),
+      name: computed(() => t("menu.create_tag")),
       shortcut: "Shift+2",
-      dialogId: DialogID.CreateLabel,
+      dialogId: DialogID.CreateTag,
     },
   ];
 
   const route = useRoute();
 
-  const nav = [
+  const nav: {
+    icon: Component;
+    active: ComputedRef<boolean>;
+    id: number;
+    name: ComputedRef<string>;
+    to: string;
+    collapsible?: {
+      active: ComputedRef<boolean>;
+      id: number;
+      name: ComputedRef<string>;
+      to: string;
+    }[];
+  }[] = [
     {
       icon: MdiHome,
       active: computed(() => route.path === "/home"),
@@ -318,6 +407,13 @@
       to: "/items",
     },
     {
+      icon: MdiFileDocumentMultiple,
+      id: 3,
+      active: computed(() => route.path === "/templates"),
+      name: computed(() => t("menu.templates")),
+      to: "/templates",
+    },
+    {
       icon: MdiWrench,
       id: 4,
       active: computed(() => route.path === "/maintenance"),
@@ -334,17 +430,49 @@
     {
       icon: MdiCog,
       id: 6,
-      active: computed(() => route.path === "/tools"),
-      name: computed(() => t("menu.tools")),
-      to: "/tools",
+      active: computed(() => route.path.includes("/collection")),
+      name: computed(() => t("menu.collection")),
+      to: "/collection/members",
+      collapsible: [
+        {
+          id: 61,
+          active: computed(() => route.path === "/collection/members"),
+          name: computed(() => t("collection.tabs.members")),
+          to: "/collection/members",
+        },
+        {
+          id: 62,
+          active: computed(() => route.path === "/collection/invites"),
+          name: computed(() => t("collection.tabs.invites")),
+          to: "/collection/invites",
+        },
+        {
+          id: 63,
+          active: computed(() => route.path === "/collection/notifiers"),
+          name: computed(() => t("collection.tabs.notifiers")),
+          to: "/collection/notifiers",
+        },
+        {
+          id: 64,
+          active: computed(() => route.path === "/collection/settings"),
+          name: computed(() => t("collection.tabs.settings")),
+          to: "/collection/settings",
+        },
+        {
+          id: 65,
+          active: computed(() => route.path === "/collection/tools"),
+          name: computed(() => t("collection.tabs.tools")),
+          to: "/collection/tools",
+        },
+      ],
     },
   ];
 
   const quickMenuActions = reactive([
     ...dropdown.map(v => ({
       text: computed(() => v.name.value),
-      dialogId: v.dialogId,
-      shortcut: v.shortcut.split("+")[1],
+      dialogId: v.dialogId as NoParamDialogIDs,
+      shortcut: v.shortcut.split("+")[1] as string,
       type: "create" as const,
     })),
     ...nav.map(v => ({
@@ -354,19 +482,19 @@
     })),
   ]);
 
-  const labelStore = useLabelStore();
+  const tagStore = useTagStore();
+  tagStore.ensureAllTagsFetched();
 
   const locationStore = useLocationStore();
+  locationStore.ensureLocationsFetched();
 
   onMounted(() => {
-    labelStore.refresh();
-    locationStore.refreshChildren();
     locationStore.refreshParents();
     locationStore.refreshTree();
   });
 
-  onServerEvent(ServerEvent.LabelMutation, () => {
-    labelStore.refresh();
+  onServerEvent(ServerEvent.TagMutation, () => {
+    tagStore.refresh();
   });
 
   onServerEvent(ServerEvent.LocationMutation, () => {

@@ -2,11 +2,10 @@
   import { useI18n } from "vue-i18n";
   import { toast } from "@/components/ui/sonner";
   import { Input } from "~/components/ui/input";
-  import type { ItemSummary, LabelSummary, LocationOutCount } from "~~/lib/api/types/data-contracts";
-  import { useLabelStore } from "~~/stores/labels";
+  import type { ItemSummary, TagSummary, LocationOutCount } from "~~/lib/api/types/data-contracts";
+  import { useTagStore } from "~/stores/tags";
   import { useLocationStore } from "~~/stores/locations";
   import MdiLoading from "~icons/mdi/loading";
-  import MdiSelectSearch from "~icons/mdi/select-search";
   import MdiMagnify from "~icons/mdi/magnify";
   import MdiDelete from "~icons/mdi/delete";
   import { Button } from "@/components/ui/button";
@@ -15,14 +14,10 @@
   import { Switch } from "@/components/ui/switch";
   import { Separator } from "@/components/ui/separator";
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-  import {
-    Pagination,
-    PaginationEllipsis,
-    PaginationFirst,
-    PaginationLast,
-    PaginationList,
-    PaginationListItem,
-  } from "@/components/ui/pagination";
+  import BaseContainer from "@/components/Base/Container.vue";
+  import SearchFilter from "~/components/Search/Filter.vue";
+  import ItemViewSelectable from "~/components/Item/View/Selectable.vue";
+  import type { LocationQueryRaw } from "vue-router";
 
   const { t } = useI18n();
 
@@ -43,7 +38,41 @@
   const items = ref<ItemSummary[]>([]);
   const total = ref(0);
 
-  const page1 = useRouteQuery("page", 1);
+  // Using useRouteQuery directly has two downsides
+  // 1. It persists the default value in the query string
+  // 2. The ref returned by useRouteQuery updates asynchronously after calling the setter.
+  //    This can cause unintuitive behaviors.
+  // -> We copy query parameters into separate refs on page load and update the query explicitly via `router.push`.
+  type QueryParamValue = string | string[] | number | boolean;
+  type QueryRef = Ref<boolean | string | string[] | number, boolean | string | string[] | number>;
+  const queryParamDefaultValues: Record<string, QueryParamValue> = {};
+  function useOptionalRouteQuery(key: string, defaultValue: string): Ref<string>;
+  function useOptionalRouteQuery(key: string, defaultValue: string[]): Ref<string[]>;
+  function useOptionalRouteQuery(key: string, defaultValue: number): Ref<number>;
+  function useOptionalRouteQuery(key: string, defaultValue: boolean): Ref<boolean>;
+  function useOptionalRouteQuery(key: string, defaultValue: QueryParamValue): QueryRef {
+    queryParamDefaultValues[key] = defaultValue;
+    if (typeof defaultValue === "string") {
+      const val = useRouteQuery(key, defaultValue);
+      return ref(val.value);
+    }
+    if (Array.isArray(defaultValue)) {
+      const val = useRouteQuery(key, defaultValue);
+      return ref(val.value);
+    }
+    if (typeof defaultValue === "number") {
+      const val = useRouteQuery(key, defaultValue);
+      return ref(val.value);
+    }
+    if (typeof defaultValue === "boolean") {
+      const val = useRouteQuery(key, defaultValue);
+      return ref(val.value);
+    }
+
+    throw Error(`Invalid query value type ${typeof defaultValue}`);
+  }
+
+  const page1 = useOptionalRouteQuery("page", 1);
 
   const page = computed({
     get: () => page1.value,
@@ -52,40 +81,32 @@
     },
   });
 
-  const pageSize = useRouteQuery("pageSize", 24);
-  const query = useRouteQuery("q", "");
-  const advanced = useRouteQuery("advanced", false);
-  const includeArchived = useRouteQuery("archived", false);
-  const fieldSelector = useRouteQuery("fieldSelector", false);
-  const negateLabels = useRouteQuery("negateLabels", false);
-  const onlyWithoutPhoto = useRouteQuery("onlyWithoutPhoto", false);
-  const onlyWithPhoto = useRouteQuery("onlyWithPhoto", false);
-  const orderBy = useRouteQuery("orderBy", "name");
+  const query = useOptionalRouteQuery("q", "");
+  const includeArchived = useOptionalRouteQuery("archived", false);
+  const fieldSelector = useOptionalRouteQuery("fieldSelector", false);
+  const negateTags = useOptionalRouteQuery("negateTags", false);
+  const onlyWithoutPhoto = useOptionalRouteQuery("onlyWithoutPhoto", false);
+  const onlyWithPhoto = useOptionalRouteQuery("onlyWithPhoto", false);
+  const orderBy = useOptionalRouteQuery("orderBy", "name");
+  const qLoc = useOptionalRouteQuery("loc", []);
+  const qTag = useOptionalRouteQuery("tag", []);
 
-  const totalPages = computed(() => Math.ceil(total.value / pageSize.value));
+  const preferences = useViewPreferences();
+  const pageSize = computed(() => preferences.value.itemsPerTablePage);
 
   const route = useRoute();
   const router = useRouter();
 
   onMounted(async () => {
     loading.value = true;
-    // Wait until locations and labels are loaded
-    let maxRetry = 10;
-    while (!labels.value || !locations.value) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      if (maxRetry-- < 0) {
-        break;
-      }
-    }
     searchLocked.value = true;
-    const qLoc = route.query.loc as string[];
+    await Promise.all([locationsStore.ensureLocationsFetched(), tagStore.ensureAllTagsFetched()]);
     if (qLoc) {
-      selectedLocations.value = locations.value.filter(l => qLoc.includes(l.id));
+      selectedLocations.value = locations.value.filter(l => qLoc.value.includes(l.id));
     }
 
-    const qLab = route.query.lab as string[];
-    if (qLab) {
-      selectedLabels.value = labels.value.filter(l => qLab.includes(l.id));
+    if (qTag) {
+      selectedTags.value = tags.value.filter(l => qTag.value.includes(l.id));
     }
 
     queryParamsInitialized.value = true;
@@ -103,7 +124,7 @@
     }
 
     // trigger search if no changes
-    if (!qLab && !qLoc) {
+    if (!qTag && !qLoc) {
       search();
     }
 
@@ -117,18 +138,18 @@
 
   const locationsStore = useLocationStore();
 
-  const locationFlatTree = await useFlatLocations();
+  const locationFlatTree = useFlatLocations();
 
   const locations = computed(() => locationsStore.allLocations);
 
-  const labelStore = useLabelStore();
-  const labels = computed(() => labelStore.labels);
+  const tagStore = useTagStore();
+  const tags = computed(() => tagStore.tags);
 
   const selectedLocations = ref<LocationOutCount[]>([]);
-  const selectedLabels = ref<LabelSummary[]>([]);
+  const selectedTags = ref<TagSummary[]>([]);
 
   const locIDs = computed(() => selectedLocations.value.map(l => l.id));
-  const labIDs = computed(() => selectedLabels.value.map(l => l.id));
+  const tagIDs = computed(() => selectedTags.value.map(l => l.id));
 
   function parseAssetIDString(d: string) {
     d = d.replace(/"/g, "").replace(/-/g, "");
@@ -180,26 +201,26 @@
     }
   });
 
-  watch(negateLabels, (newV, oldV) => {
+  watch(negateTags, (newV, oldV) => {
     if (newV !== oldV) {
       search();
     }
   });
 
   watch(onlyWithoutPhoto, (newV, oldV) => {
-    if (newV && onlyWithPhoto) {
+    if (newV && onlyWithPhoto.value) {
+      // this triggers the watch on onlyWithPhoto
       onlyWithPhoto.value = false;
-    }
-    if (newV !== oldV) {
+    } else if (newV !== oldV) {
       search();
     }
   });
 
   watch(onlyWithPhoto, (newV, oldV) => {
-    if (newV && onlyWithoutPhoto) {
+    if (newV && onlyWithoutPhoto.value) {
+      // this triggers the watch on onlyWithoutPhoto
       onlyWithoutPhoto.value = false;
-    }
-    if (newV !== oldV) {
+    } else if (newV !== oldV) {
       search();
     }
   });
@@ -209,6 +230,15 @@
       search();
     }
   });
+
+  watch(
+    () => useRoute().query.q,
+    (newV, oldV) => {
+      if (newV !== oldV) {
+        query.value = (newV as string) || "";
+      }
+    }
+  );
 
   async function fetchValues(field: string): Promise<string[]> {
     if (fieldValuesCache.value[field]) {
@@ -226,30 +256,6 @@
     return data;
   }
 
-  watch(advanced, (v, lv) => {
-    if (v === false && lv === true) {
-      selectedLocations.value = [];
-      selectedLabels.value = [];
-      fieldTuples.value = [];
-
-      console.log("advanced", advanced.value);
-
-      router.push({
-        query: {
-          advanced: route.query.advanced,
-          q: query.value,
-          page: page.value,
-          pageSize: pageSize.value,
-          includeArchived: includeArchived.value ? "true" : "false",
-          negateLabels: negateLabels.value ? "true" : "false",
-          onlyWithoutPhoto: onlyWithoutPhoto.value ? "true" : "false",
-          onlyWithPhoto: onlyWithPhoto.value ? "true" : "false",
-          orderBy: orderBy.value,
-        },
-      });
-    }
-  });
-
   async function search() {
     if (searchLocked.value) {
       return;
@@ -265,11 +271,47 @@
       }
     }
 
+    const push_query: Record<string, string | string[] | number | boolean | undefined> = {
+      archived: includeArchived.value,
+      fieldSelector: fieldSelector.value,
+      negateTags: negateTags.value,
+      onlyWithoutPhoto: onlyWithoutPhoto.value,
+      onlyWithPhoto: onlyWithPhoto.value,
+      orderBy: orderBy.value,
+      page: page.value,
+      q: query.value,
+      loc: locIDs.value,
+      tag: tagIDs.value,
+      fields: fields,
+    };
+
+    for (const key in push_query) {
+      const val = push_query[key];
+      const defaultVal = queryParamDefaultValues[key];
+      if (
+        (Array.isArray(val) &&
+          Array.isArray(defaultVal) &&
+          val.length == defaultVal.length &&
+          val.every(v => (defaultVal as string[]).includes(v))) ||
+        val === queryParamDefaultValues[key]
+      ) {
+        push_query[key] = undefined;
+      }
+
+      // Empirically seen to be unnecessary but according to router.push types,
+      // booleans are not supported. This might be more stable.
+      if (typeof push_query[key] === "boolean") {
+        push_query[key] = String(val);
+      }
+    }
+
+    await router.push({ query: push_query as LocationQueryRaw });
+
     const { data, error } = await api.items.getAll({
       q: query.value || "",
       locations: locIDs.value,
-      labels: labIDs.value,
-      negateLabels: negateLabels.value,
+      tags: tagIDs.value,
+      negateTags: negateTags.value,
       onlyWithoutPhoto: onlyWithoutPhoto.value,
       onlyWithPhoto: onlyWithPhoto.value,
       includeArchived: includeArchived.value,
@@ -304,7 +346,7 @@
     initialSearch.value = false;
   }
 
-  watchDebounced([page, pageSize, query, selectedLabels, selectedLocations], search, { debounce: 250, maxWait: 1000 });
+  watchDebounced([page, pageSize, query, selectedTags, selectedLocations], search, { debounce: 250, maxWait: 1000 });
 
   async function submit() {
     // Set URL Params
@@ -314,28 +356,6 @@
         fields.push(`${t[0]}=${t[1]}`);
       }
     }
-
-    // Push non-reactive query fields
-    await router.push({
-      query: {
-        // Reactive
-        advanced: "true",
-        archived: includeArchived.value ? "true" : "false",
-        fieldSelector: fieldSelector.value ? "true" : "false",
-        negateLabels: negateLabels.value ? "true" : "false",
-        onlyWithoutPhoto: onlyWithoutPhoto.value ? "true" : "false",
-        onlyWithPhoto: onlyWithPhoto.value ? "true" : "false",
-        orderBy: orderBy.value,
-        pageSize: pageSize.value,
-        page: page.value,
-        q: query.value,
-
-        // Non-reactive
-        loc: locIDs.value,
-        lab: labIDs.value,
-        fields,
-      },
-    });
 
     // Reset Pagination
     page.value = 1;
@@ -353,27 +373,22 @@
       }
     }
 
-    await router.push({
-      query: {
-        archived: "false",
-        fieldSelector: "false",
-        pageSize: pageSize.value,
-        page: 1,
-        orderBy: "name",
-        q: "",
-        loc: [],
-        lab: [],
-        fields,
-      },
-    });
-
     await search();
   }
+
+  const pagination = proxyRefs({
+    page,
+    pageSize,
+    totalSize: total,
+    setPage: (newPage: number) => {
+      page.value = newPage;
+    },
+  });
 </script>
 
 <template>
   <BaseContainer>
-    <div v-if="locations && labels">
+    <div v-if="locations && tags">
       <div class="flex flex-wrap items-end gap-4 md:flex-nowrap">
         <div class="w-full">
           <Input v-model:model-value="query" :placeholder="$t('global.search')" class="h-12" />
@@ -390,7 +405,7 @@
 
       <div class="flex w-full flex-wrap gap-2 py-2 md:flex-nowrap">
         <SearchFilter v-model="selectedLocations" :label="$t('global.locations')" :options="locationFlatTree" />
-        <SearchFilter v-model="selectedLabels" :label="$t('global.labels')" :options="labels" />
+        <SearchFilter v-model="selectedTags" :label="$t('global.tags')" :options="tags" />
         <Popover>
           <PopoverTrigger as-child>
             <Button size="sm" variant="outline"> {{ $t("items.options") }}</Button>
@@ -398,32 +413,32 @@
           <PopoverContent class="z-40 flex flex-col gap-2">
             <Label class="flex cursor-pointer items-center">
               <Switch v-model="includeArchived" class="ml-auto" />
-              <div class="grow"></div>
-              {{ $t("items.include_archive") }}
+              <div class="grow" />
+              <span class="text-right"> {{ $t("items.include_archive") }} </span>
             </Label>
             <Label class="flex cursor-pointer items-center">
               <Switch v-model="fieldSelector" class="ml-auto" />
-              <div class="grow"></div>
-              {{ $t("items.field_selector") }}
+              <div class="grow" />
+              <span class="text-right"> {{ $t("items.field_selector") }} </span>
             </Label>
             <Label class="flex cursor-pointer items-center">
-              <Switch v-model="negateLabels" class="ml-auto" />
-              <div class="grow"></div>
-              {{ $t("items.negate_labels") }}
+              <Switch v-model="negateTags" class="ml-auto" />
+              <div class="grow" />
+              <span class="text-right"> {{ $t("items.negate_tags") }} </span>
             </Label>
             <Label class="flex cursor-pointer items-center">
               <Switch v-model="onlyWithoutPhoto" class="ml-auto" />
-              <div class="grow"></div>
-              {{ $t("items.only_without_photo") }}
+              <div class="grow" />
+              <span class="text-right"> {{ $t("items.only_without_photo") }} </span>
             </Label>
             <Label class="flex cursor-pointer items-center">
               <Switch v-model="onlyWithPhoto" class="ml-auto" />
-              <div class="grow"></div>
-              {{ $t("items.only_with_photo") }}
+              <div class="grow" />
+              <span class="text-right"> {{ $t("items.only_with_photo") }} </span>
             </Label>
             <Label class="flex cursor-pointer flex-col gap-2">
               <span class="text-right">
-                {{ $t("items.order_by") }}
+                <span class="text-right"> {{ $t("items.order_by") }} </span>
               </span>
 
               <Select v-model="orderBy">
@@ -431,6 +446,7 @@
                   <SelectValue :placeholder="$t('items.order_by')" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="name"> {{ $t("items.name") }} </SelectItem>
                   <SelectItem value="createdAt"> {{ $t("items.created_at") }} </SelectItem>
                   <SelectItem value="updatedAt"> {{ $t("items.updated_at") }} </SelectItem>
                 </SelectContent>
@@ -440,7 +456,7 @@
             <Button @click="reset"> {{ $t("items.reset_search") }} </Button>
           </PopoverContent>
         </Popover>
-        <div class="grow"></div>
+        <div class="grow" />
         <Popover>
           <PopoverTrigger as-child>
             <Button size="sm" variant="outline"> {{ $t("items.tips") }}</Button>
@@ -465,8 +481,8 @@
         <p>{{ $t("items.custom_fields") }}</p>
         <div v-for="(f, idx) in fieldTuples" :key="idx" class="flex flex-wrap gap-2">
           <div class="flex w-full flex-col gap-1 md:w-auto md:grow">
-            <Label> Field </Label>
-            <Select v-model="fieldTuples[idx][0]" @update:model-value="fetchValues(f[0])">
+            <Label> {{ $t("items.field") }} </Label>
+            <Select v-model="fieldTuples[idx]![0]" @update:model-value="fetchValues(f[0])">
               <SelectTrigger>
                 <SelectValue :placeholder="$t('items.select_field')" />
               </SelectTrigger>
@@ -477,9 +493,9 @@
           </div>
           <div class="flex w-full flex-col gap-1 md:w-auto md:grow">
             <Label> {{ $t("items.field_value") }} </Label>
-            <Select v-model="fieldTuples[idx][1]">
+            <Select v-model="fieldTuples[idx]![1]">
               <SelectTrigger>
-                <SelectValue placeholder="Select a value" />
+                <SelectValue :placeholder="$t('items.select_value')" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem v-for="value in fieldValuesCache[f[0]]" :key="value" :value="value">
@@ -499,41 +515,13 @@
     </div>
 
     <section>
-      <BaseSectionHeader ref="itemsTitle"> {{ $t("global.items") }} </BaseSectionHeader>
-      <p v-if="items.length > 0" class="flex items-center text-base font-medium">
-        {{ $t("items.results", { total: total }) }}
-        <span class="ml-auto text-base"> {{ $t("items.pages", { page: page, totalPages: totalPages }) }} </span>
-      </p>
-
-      <div v-if="items.length === 0" class="flex flex-col items-center gap-2">
-        <MdiSelectSearch class="size-10" />
-        <p>{{ $t("items.no_results") }}</p>
-      </div>
-      <div v-else ref="cardgrid" class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <ItemCard v-for="item in items" :key="item.id" :item="item" :location-flat-tree="locationFlatTree" />
-      </div>
-      <Pagination
-        v-slot="{ page: currentPage }"
-        :items-per-page="pageSize"
-        :total="total"
-        :sibling-count="2"
-        :default-page="page"
-        class="flex justify-center p-2"
-        @update:page="page = $event"
-      >
-        <PaginationList v-slot="{ items: pageItems }" class="flex items-center gap-1">
-          <PaginationFirst />
-          <template v-for="(item, index) in pageItems">
-            <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-              <Button class="size-10 p-0" :variant="item.value === currentPage ? 'default' : 'outline'">
-                {{ item.value }}
-              </Button>
-            </PaginationListItem>
-            <PaginationEllipsis v-else :key="item.type" :index="index" />
-          </template>
-          <PaginationLast />
-        </PaginationList>
-      </Pagination>
+      <ItemViewSelectable
+        :items="items"
+        :location-flat-tree="locationFlatTree"
+        :pagination="pagination"
+        disable-sort
+        @refresh="async () => search()"
+      />
     </section>
   </BaseContainer>
 </template>

@@ -7,13 +7,34 @@ import (
 	_ "embed"
 	"encoding/json"
 	"io"
+	"log"
 	"slices"
 	"strings"
 	"sync"
+
+	"github.com/samber/lo"
 )
 
 //go:embed currencies.json
 var defaults []byte
+
+const (
+	MinDecimals = 0
+	MaxDecimals = 18
+)
+
+// clampDecimals ensures the decimals value is within a safe range [0, 18]
+func clampDecimals(decimals int, code string) int {
+	original := decimals
+	if decimals < MinDecimals {
+		decimals = MinDecimals
+		log.Printf("WARNING: Currency %s had negative decimals (%d), normalized to %d", code, original, decimals)
+	} else if decimals > MaxDecimals {
+		decimals = MaxDecimals
+		log.Printf("WARNING: Currency %s had excessive decimals (%d), normalized to %d", code, original, decimals)
+	}
+	return decimals
+}
 
 type CollectorFunc func() ([]Currency, error)
 
@@ -23,6 +44,11 @@ func CollectJSON(reader io.Reader) CollectorFunc {
 		err := json.NewDecoder(reader).Decode(&currencies)
 		if err != nil {
 			return nil, err
+		}
+
+		// Clamp decimals during collection to ensure early normalization
+		for i := range currencies {
+			currencies[i].Decimals = clampDecimals(currencies[i].Decimals, currencies[i].Code)
 		}
 
 		return currencies, nil
@@ -48,10 +74,11 @@ func CollectionCurrencies(collectors ...CollectorFunc) ([]Currency, error) {
 }
 
 type Currency struct {
-	Name   string `json:"name"`
-	Code   string `json:"code"`
-	Local  string `json:"local"`
-	Symbol string `json:"symbol"`
+	Name     string `json:"name"`
+	Code     string `json:"code"`
+	Local    string `json:"local"`
+	Symbol   string `json:"symbol"`
+	Decimals int    `json:"decimals"`
 }
 
 type CurrencyRegistry struct {
@@ -60,10 +87,10 @@ type CurrencyRegistry struct {
 }
 
 func NewCurrencyService(currencies []Currency) *CurrencyRegistry {
-	registry := make(map[string]Currency, len(currencies))
-	for i := range currencies {
-		registry[currencies[i].Code] = currencies[i]
-	}
+	registry := lo.SliceToMap(currencies, func(c Currency) (string, Currency) {
+		c.Decimals = clampDecimals(c.Decimals, c.Code)
+		return c.Code, c
+	})
 
 	return &CurrencyRegistry{
 		registry: registry,
@@ -74,10 +101,7 @@ func (cs *CurrencyRegistry) Slice() []Currency {
 	cs.mu.RLock()
 	defer cs.mu.RUnlock()
 
-	out := make([]Currency, 0, len(cs.registry))
-	for key := range cs.registry {
-		out = append(out, cs.registry[key])
-	}
+	out := lo.Values(cs.registry)
 
 	slices.SortFunc(out, func(a, b Currency) int {
 		if a.Name < b.Name {
@@ -99,6 +123,5 @@ func (cs *CurrencyRegistry) IsSupported(code string) bool {
 
 	cs.mu.RLock()
 	defer cs.mu.RUnlock()
-	_, ok := cs.registry[upper]
-	return ok
+	return lo.HasKey(cs.registry, upper)
 }

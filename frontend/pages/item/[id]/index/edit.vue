@@ -1,23 +1,36 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
   import { useI18n } from "vue-i18n";
   import { toast } from "@/components/ui/sonner";
   import type { ItemAttachment, ItemField, ItemOut, ItemUpdate } from "~~/lib/api/types/data-contracts";
   import { AttachmentTypes } from "~~/lib/api/types/non-generated";
-  import { useLabelStore } from "~~/stores/labels";
+  import { useTagStore } from "~/stores/tags";
   import { useLocationStore } from "~~/stores/locations";
   import MdiLoading from "~icons/mdi/loading";
   import MdiDelete from "~icons/mdi/delete";
   import MdiPencil from "~icons/mdi/pencil";
   import MdiContentSaveOutline from "~icons/mdi/content-save-outline";
+  import MdiImageOutline from "~icons/mdi/image-outline";
   import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
   import { Button } from "@/components/ui/button";
   import { useDialog } from "@/components/ui/dialog-provider";
   import { Checkbox } from "@/components/ui/checkbox";
   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-  import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
   import { Switch } from "@/components/ui/switch";
   import { Label } from "@/components/ui/label";
   import { DialogID } from "~/components/ui/dialog-provider/utils";
+  import FormTextField from "~/components/Form/TextField.vue";
+  import FormTextArea from "~/components/Form/TextArea.vue";
+  import MarkdownEditor from "~/components/Form/MarkdownEditor.vue";
+  import FormDatePicker from "~/components/Form/DatePicker.vue";
+  import FormCheckbox from "~/components/Form/Checkbox.vue";
+  import LocationSelector from "~/components/Location/Selector.vue";
+  import ItemSelector from "~/components/Item/Selector.vue";
+  import TagSelector from "~/components/Tag/Selector.vue";
+  import BaseCard from "@/components/Base/Card.vue";
+  import { Card } from "~/components/ui/card";
+  import DropZone from "~/components/global/DropZone.vue";
 
   const { t } = useI18n();
 
@@ -36,8 +49,8 @@
   const locationStore = useLocationStore();
   const locations = computed(() => locationStore.allLocations);
 
-  const labelStore = useLabelStore();
-  const labels = computed(() => labelStore.labels);
+  const tagStore = useTagStore();
+  const tags = computed(() => tagStore.tags);
 
   const {
     data: nullableItem,
@@ -51,7 +64,7 @@
       return;
     }
 
-    if (locations && data.location?.id) {
+    if (locations.value && data.location?.id) {
       // @ts-expect-error - we know the locations is valid
       const location = locations.value.find(l => l.id === data.location.id);
       if (location) {
@@ -66,13 +79,13 @@
     return data;
   });
 
-  const item = ref<ItemOut & { labelIds: string[] }>(null as any);
+  const item = ref<ItemOut & { tagIds: string[] }>(null as never);
 
   watchEffect(() => {
     if (nullableItem.value) {
       item.value = {
         ...nullableItem.value,
-        labelIds: nullableItem.value.labels.map(l => l.id) ?? [],
+        tagIds: nullableItem.value.tags.map(l => l.id) ?? [],
       };
     }
   });
@@ -85,7 +98,7 @@
 
   const saving = ref(false);
 
-  async function saveItem() {
+  async function saveItem(redirect: boolean) {
     if (!item.value.location?.id) {
       toast.error(t("items.toast.failed_save_no_location"));
       return;
@@ -108,7 +121,7 @@
     const payload: ItemUpdate = {
       ...item.value,
       locationId: item.value.location?.id,
-      labelIds: item.value.labelIds,
+      tagIds: item.value.tagIds,
       parentId: parent.value ? parent.value.id : null,
       assetId: item.value.assetId,
       purchasePrice,
@@ -126,7 +139,9 @@
     }
 
     toast.success(t("items.toast.item_saved"));
-    navigateTo("/item/" + itemId.value);
+    if (redirect) {
+      navigateTo("/item/" + itemId.value);
+    }
   }
 
   type NonNullableStringKeys<T> = Extract<keyof T, keyof { [K in keyof T as T[K] extends string ? K : never]: any }>;
@@ -135,7 +150,7 @@
   type DateKeys<T> = Extract<keyof T, keyof { [K in keyof T as T[K] extends Date | string ? K : never]: any }>;
 
   type TextFormField = {
-    type: "text" | "textarea";
+    type: "text" | "textarea" | "markdown";
     label: string;
     ref: NonNullableStringKeys<ItemOut>;
     maxLength?: number;
@@ -176,7 +191,7 @@
       ref: "quantity",
     },
     {
-      type: "textarea",
+      type: "markdown",
       label: "items.description",
       ref: "description",
       maxLength: 1000,
@@ -200,7 +215,7 @@
       maxLength: 255,
     },
     {
-      type: "textarea",
+      type: "markdown",
       label: "items.notes",
       ref: "notes",
       maxLength: 1000,
@@ -313,7 +328,7 @@
   const dropReceipt = (files: File[] | null) => uploadAttachment(files, AttachmentTypes.Receipt);
 
   async function uploadAttachment(files: File[] | null, type: AttachmentTypes | null) {
-    if (!files || files.length === 0) {
+    if (!files || files.length === 0 || !files[0]) {
       return;
     }
 
@@ -325,6 +340,8 @@
     }
 
     toast.success(t("items.toast.attachment_uploaded"));
+
+    await saveItem(false);
 
     item.value.attachments = data.attachments;
   }
@@ -361,7 +378,7 @@
   });
 
   const attachmentOpts = Object.entries(AttachmentTypes).map(([key, value]) => ({
-    text: key[0].toUpperCase() + key.slice(1),
+    text: key[0]!.toUpperCase() + key.slice(1),
     value,
   }));
 
@@ -372,7 +389,7 @@
     editState.primary = attachment.primary;
     openDialog(DialogID.AttachmentEdit);
 
-    editState.obj = attachmentOpts.find(o => o.value === attachment.type) || attachmentOpts[0];
+    editState.obj = attachmentOpts.find(o => o.value === attachment.type) || attachmentOpts[0]!;
   }
 
   async function updateAttachment() {
@@ -412,20 +429,20 @@
     } as unknown as ItemField);
   }
 
-  const { query, results } = useItemSearch(api, { immediate: false });
+  const { query, results, isLoading, triggerSearch } = useItemSearch(api, { immediate: false });
   const parent = ref();
 
   async function keyboardSave(e: KeyboardEvent) {
     // Cmd + S
     if (e.metaKey && e.key === "s") {
       e.preventDefault();
-      await saveItem();
+      await saveItem(!e.shiftKey);
     }
 
     // Ctrl + S
     if (e.ctrlKey && e.key === "s") {
       e.preventDefault();
-      await saveItem();
+      await saveItem(!e.shiftKey);
     }
   }
 
@@ -469,7 +486,7 @@
     const payload: ItemUpdate = {
       ...item.value,
       locationId: item.value.location?.id,
-      labelIds: item.value.labelIds,
+      tagIds: item.value.tagIds,
       parentId: parent.value ? parent.value.id : null,
       assetId: item.value.assetId,
     };
@@ -477,7 +494,7 @@
     const { error } = await api.items.update(itemId.value, payload);
 
     if (error) {
-      toast.error("Failed to save item");
+      toast.error(t("items.toast.failed_save"));
       return;
     }
 
@@ -560,7 +577,7 @@
             <TooltipContent>{{ $t("items.show_advanced_view_options") }}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
-        <Button size="sm" :disabled="saving" @click="saveItem">
+        <Button size="sm" :disabled="saving" @click="saveItem(true)">
           <MdiLoading v-if="saving" class="animate-spin" />
           <MdiContentSaveOutline v-else />
           {{ $t("global.save") }}
@@ -579,13 +596,15 @@
               :label="$t('items.parent_item')"
               no-results-text="Type to search..."
               :exclude-items="[item]"
+              :is-loading="isLoading"
+              :trigger-search="triggerSearch"
               @update:model-value="maybeSyncWithParentLocation()"
             />
             <div class="flex flex-col gap-2">
               <Label class="px-1">{{ $t("items.sync_child_locations") }}</Label>
               <Switch v-model="item.syncChildItemsLocations" @update:model-value="syncChildItemsLocations()" />
             </div>
-            <LabelSelector v-model="item.labelIds" :labels="labels" />
+            <TagSelector v-model="item.tagIds" :tags="tags" />
           </div>
 
           <div class="border-t sm:p-0">
@@ -596,6 +615,13 @@
                   v-model="item[field.ref]"
                   :label="$t(field.label)"
                   inline
+                  :max-length="field.maxLength"
+                  :min-length="field.minLength"
+                />
+                <MarkdownEditor
+                  v-else-if="field.type === 'markdown'"
+                  v-model="item[field.ref]"
+                  :label="$t(field.label)"
                   :max-length="field.maxLength"
                   :min-length="field.minLength"
                 />
@@ -697,6 +723,33 @@
                   {{ $t(`items.${attachment.type}`) }}
                 </p>
                 <div class="flex justify-end gap-2">
+                  <Tooltip v-if="attachment.type === 'photo'">
+                    <TooltipTrigger as-child>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        @click="
+                          openDialog(DialogID.ItemImage, {
+                            params: {
+                              type: 'attachment',
+                              itemId: item.id,
+                              attachmentId: attachment.id,
+                              thumbnailId: attachment.thumbnail?.id,
+                              mimeType: attachment.mimeType,
+                            },
+                            onClose: result => {
+                              if (result?.action === 'delete') {
+                                item.attachments = item.attachments.filter(a => a.id !== result.id);
+                              }
+                            },
+                          })
+                        "
+                      >
+                        <MdiImageOutline />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{{ $t("items.edit.view_image") }}</TooltipContent>
+                  </Tooltip>
                   <Tooltip>
                     <TooltipTrigger as-child>
                       <Button variant="destructive" size="icon" @click="deleteAttachment(attachment.id)">

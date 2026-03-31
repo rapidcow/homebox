@@ -10,7 +10,7 @@
 
       <slot />
 
-      <DialogFooter>
+      <DialogFooter v-if="!hideFooter">
         <i18n-t
           keypath="components.app.create_modal.createAndAddAnother"
           tag="span"
@@ -47,12 +47,14 @@
   import { useMediaQuery } from "@vueuse/core";
   import type { DialogID } from "@/components/ui/dialog-provider/utils";
   import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-  import { Dialog, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+  import { Dialog, DialogFooter, DialogHeader, DialogScrollContent, DialogTitle } from "@/components/ui/dialog";
+  import { Shortcut } from "@/components/ui/shortcut";
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   defineProps<{
     dialogId: DialogID;
     title: string;
+    hideFooter?: boolean;
   }>();
 </script>

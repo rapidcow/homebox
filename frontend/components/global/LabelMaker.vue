@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { useI18n } from "vue-i18n";
-  import { route } from "../../lib/api/base";
+  import { type QueryValue, route } from "../../lib/api/base/urls";
   import PageQRCode from "./PageQRCode.vue";
   import { DialogID } from "@/components/ui/dialog-provider/utils";
   import { toast } from "@/components/ui/sonner";
@@ -11,14 +11,14 @@
   import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogDescription,
   } from "@/components/ui/dialog";
   import { useDialog } from "@/components/ui/dialog-provider";
   import { Button, ButtonGroup } from "@/components/ui/button";
-  import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+  import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
   const { t } = useI18n();
   const { openDialog, closeDialog } = useDialog();
@@ -78,7 +78,12 @@
   }
 
   function getLabelUrl(print: boolean): string {
-    const params = { print };
+    const { selectedId } = useCollections();
+    const params: Record<string, QueryValue> = { print };
+
+    if (selectedId.value) {
+      params.tenant = selectedId.value;
+    }
 
     if (props.type === "item") {
       return route(`/labelmaker/item/${props.id}`, params);

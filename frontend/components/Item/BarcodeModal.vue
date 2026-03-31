@@ -40,7 +40,7 @@
       <Separator />
 
       <BaseCard>
-        <Table class="w-full">
+        <Table class="w-full whitespace-nowrap">
           <TableHeader>
             <TableRow>
               <TableHead
@@ -100,7 +100,9 @@
       </BaseCard>
 
       <DialogFooter>
-        <Button type="import" :disabled="selectedRow === -1" @click="createItem"> Import selected </Button>
+        <Button type="button" :disabled="selectedRow === -1" @click="createItem">
+          {{ $t("components.item.product_import.import_selected") }}
+        </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
@@ -115,7 +117,11 @@
   import MdiAlertCircleOutline from "~icons/mdi/alert-circle-outline";
   import MdiBarcode from "~icons/mdi/barcode";
   import MdiLoading from "~icons/mdi/loading";
-  import type { TableData } from "~/components/Item/View/Table.types";
+  import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+  import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+  import { Separator } from "@/components/ui/separator";
+  import BaseCard from "@/components/Base/Card.vue";
+  import FormTextField from "@/components/Form/TextField.vue";
 
   const { openDialog, registerOpenDialogCallback } = useDialog();
   const { t } = useI18n();
@@ -149,7 +155,7 @@
   const headers = defaultHeaders;
 
   onMounted(() => {
-    registerOpenDialogCallback(DialogID.ProductImport, params => {
+    const cleanup = registerOpenDialogCallback(DialogID.ProductImport, params => {
       selectedRow.value = -1;
       searching.value = false;
       errorMessage.value = null;
@@ -168,6 +174,8 @@
         products.value = null;
       }
     });
+
+    onUnmounted(cleanup);
   });
 
   const api = useUserApi();
@@ -180,7 +188,9 @@
       selectedRow.value < products.value.length
     ) {
       const p = products.value![selectedRow.value];
-      openDialog(DialogID.CreateItem, { product: p });
+      openDialog(DialogID.CreateItem, {
+        params: { product: p },
+      });
     }
   }
 
@@ -216,7 +226,8 @@
     }
   }
 
-  function extractValue(data: TableData, value: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function extractValue(data: Record<string, any>, value: string) {
     const parts = value.split(".");
     let current = data;
     for (const part of parts) {

@@ -1,10 +1,20 @@
 {
     "components": {
         "app": {
+            "create_modal": {
+                "createAndAddAnother": "Використовуйте {shiftKey} + {enterKey}, щоб створити та додати ще один.",
+                "enter": "Enter",
+                "shift": "Shift"
+            },
             "import_dialog": {
                 "change_warning": "Поведінка для імпорту з існуючим параметром import_refs змінилася. Якщо цей параметр присутній у CSV файлі, \nпредмет буде оновлений значеннями з CSV.",
                 "description": "Імпортувати CSV файл з предметами, мітками і локаціями. Зверніться до документації за\nдодатковою інформацією по формату.",
-                "title": "Імпортувати .CSV"
+                "title": "Імпортувати .CSV",
+                "toast": {
+                    "import_failed": "Помилка імпорту. Будь ласка, спробуйте пізніше.",
+                    "import_success": "Імпортовано успішно!",
+                    "please_select_file": "Будь ласка, виберіть файл для імпорту."
+                }
             },
             "outdated": {
                 "current_version": "Поточна версія",
@@ -12,6 +22,18 @@
                 "latest_version": "Остання версія",
                 "new_version_available": "Доступна нова версія",
                 "new_version_available_link": "Натисніть тут, щоб переглянути примітки до випуску"
+            }
+        },
+        "color_selector": {
+            "clear": "Очистити колір",
+            "color": "Колір",
+            "no_color": "Без коліру",
+            "no_color_selected": "Колір не вибрано",
+            "randomize": "Випадковий колір"
+        },
+        "form": {
+            "password": {
+                "toggle_show": "Показати/приховати пароль"
             }
         },
         "global": {
@@ -51,7 +73,12 @@
                 "download": "Завантажити ярлик",
                 "print": "Друкована етикетка",
                 "server_print": "Друк на сервері",
-                "titles": "Етикетка"
+                "titles": "Етикетка",
+                "toast": {
+                    "load_status_failed": "Не вдалося завантажити статус",
+                    "print_failed": "Не вдалося роздрукувати етикетку",
+                    "print_success": "Етикетку роздруковано"
+                }
             },
             "page_qr_code": {
                 "page_url": "URL сторінки",
@@ -62,13 +89,45 @@
             }
         },
         "item": {
+            "attachments_list": {
+                "download": "Завантажити",
+                "open_new_tab": "Відкрити у новій вкладці"
+            },
             "create_modal": {
+                "delete_photo": "Видалити фото",
                 "item_description": "Опис елемента",
                 "item_name": "Назва елемента",
                 "item_photo": "Фотографія товару 📷",
                 "item_quantity": "Кількість товару",
+                "parent_item": "Батьківський елемент",
+                "product_tooltip_input_barcode": "Автозаповнення за введеним штрих-кодом",
+                "product_tooltip_scan_barcode": "Автозаповнити за штрих-кодом з 📷",
+                "rotate_photo": "Повернути фото",
+                "set_as_primary_photo": "Встановити { isPrimary, select, true {non-} false {} other {}}основним фотом",
                 "title": "Додати предмет",
-                "upload_photos": "Завантажувати фотографії"
+                "toast": {
+                    "already_creating": "Елемент вже створюється",
+                    "create_failed": "Не вдалося створили елемент",
+                    "create_success": "Елемент створено",
+                    "failed_load_parent": "Не вдалося завантажити батьківський елемент - будь ласка, виберіть вручну",
+                    "no_canvas_support": "Ваш браузер не підтримує операції з canvas",
+                    "please_select_location": "Виберіть місцезнаходження.",
+                    "rotate_failed": "Не вдалося повернути зображення: { error }",
+                    "rotate_process_failed": "Не вдалося обробити повернуте зображення",
+                    "upload_failed": "Не вдалося завантажити фото: { photoName }",
+                    "uploading_photos": "{count, plural, =0 {Фото не завантажене} =1 {Завантажене 1 фото…} other {Завантажено {count} фото…}}"
+                },
+                "upload_photos": "Завантажувати фотографії",
+                "uploaded": "Фотографію завантажено"
+            },
+            "product_import": {
+                "barcode": "Штрихкод продукту",
+                "db_source": "Джерело БД",
+                "error_exception": "Виникла помилка під час отримання штрихкоду товару: ",
+                "error_invalid_barcode": "Надано недійсний штрихкод",
+                "error_not_found": "Не знайдено продукту з наданим штрихкодом.",
+                "search_item": "Пошук продукту",
+                "title": "Імпорт продукту"
             },
             "view": {
                 "selectable": {
@@ -85,16 +144,6 @@
                 }
             }
         },
-        "label": {
-            "create_modal": {
-                "label_description": "Опис мітки",
-                "label_name": "Назва мітки",
-                "title": "Створити наліпку"
-            },
-            "selector": {
-                "select_labels": "Виберіть ярлики"
-            }
-        },
         "location": {
             "create_modal": {
                 "location_description": "Опис місця",
@@ -108,7 +157,7 @@
                 "select_location": "Виберіть місце розташування"
             },
             "tree": {
-                "no_locations": "Локації відсутні. Додайте нову за допомогою \n<`span class=\"link-primary\"`>`Створити`<`/span`>` клавіші ліворуч."
+                "no_locations": "Локації відсутні. Додайте нову за допомогою \n'<span class=\"link-primary\">'Створити'</span>' клавіші ліворуч."
             }
         },
         "quick_menu": {
@@ -132,14 +181,13 @@
         "email": "Email",
         "follow_dev": "Підписатись на розробника",
         "footer": {
-            "api_link": "<a href=\"https://homebox.software/en/api/\" target=\"_blank\">'API'</a>'",
-            "version_link": "'<'a href=\"{ gitwebUrl }\"'>' Версія: { version } Build: { build } '</a>'"
+            "api_link": "'<a href=\"https://homebox.software/en/api/\" target=\"_blank\">'API'</a>'",
+            "version_link": "'<'a href=\"https://github.com/sysadminsmedia/homebox/releases/tag/{ version }\" target=\"_blank\"'>' Версія: { version } Build: { build } '</a>'"
         },
         "github": "GitHub проекту",
         "insured": "Застрахований",
         "items": "Предмети",
         "join_discord": "Доєднатися до Discord",
-        "labels": "Наліпки",
         "locations": "Локації",
         "maintenance": "Технічне обслуговування",
         "name": "Ім'я",
@@ -157,12 +205,10 @@
         "welcome": "Вітаю, { username }"
     },
     "home": {
-        "labels": "Мітки",
         "quick_statistics": "Швидка статистика",
         "recently_added": "Нещодавно додано",
         "storage_locations": "Місця зберігання",
         "total_items": "Всього елементів",
-        "total_labels": "Всього міток",
         "total_locations": "Загальна кількість місць",
         "total_value": "Загальна вартість"
     },
@@ -205,7 +251,6 @@
         "manufacturer": "Виробник",
         "model_number": "Номер моделі",
         "name": "Назва",
-        "negate_labels": "Відмінити обрані мітки",
         "next_page": "Наступна сторінка",
         "no_results": "Предметів нема",
         "notes": "Примітки",
@@ -243,10 +288,6 @@
         "warranty": "Гарантія",
         "warranty_details": "Деталі гарантії",
         "warranty_expires": "Гарантія закінчується"
-    },
-    "labels": {
-        "no_results": "Мітки не знайдено",
-        "update_label": "Оновити мітку"
     },
     "languages": {
         "ca": "Каталонська",
@@ -326,15 +367,13 @@
     },
     "menu": {
         "create_item": "Елемент / Актив",
-        "create_label": "Мітка",
         "create_location": "Місце",
         "home": "Головна",
         "locations": "Локації",
         "maintenance": "Обслуговування",
         "profile": "Профіль",
         "scanner": "Сканер",
-        "search": "Пошук",
-        "tools": "Інструменти"
+        "search": "Пошук"
     },
     "profile": {
         "active": "Активний",
@@ -345,7 +384,6 @@
         "delete_account_sub": "Видалити акаунт і всі пов'язані дані. Це невідворотна дія.",
         "enabled": "Включено",
         "example": "Приклад",
-        "gen_invite": "Створити посилання для запрошення",
         "group_settings": "Налаштування групи",
         "group_settings_sub": "Налаштування спільної групи. Можливо, вам доведеться оновити сторінку для збереження параметрів.",
         "inactive": "Неактивний",

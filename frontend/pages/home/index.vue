@@ -2,8 +2,16 @@
   import { useI18n } from "vue-i18n";
   import { statCardData } from "./statistics";
   import { itemsTable } from "./table";
-  import { useLabelStore } from "~~/stores/labels";
+  import { useTagStore } from "~/stores/tags";
   import { useLocationStore } from "~~/stores/locations";
+  import BaseContainer from "@/components/Base/Container.vue";
+  import BaseCard from "@/components/Base/Card.vue";
+  import Subtitle from "~/components/global/Subtitle.vue";
+  import StatCard from "~/components/global/StatCard/StatCard.vue";
+  import ItemCard from "~/components/Item/Card.vue";
+  import LocationCard from "~/components/Location/Card.vue";
+  import TagChip from "~/components/Tag/Chip.vue";
+  import Table from "~/components/Item/View/Table.vue";
 
   const { t } = useI18n();
 
@@ -20,8 +28,8 @@
   const locationStore = useLocationStore();
   const locations = computed(() => locationStore.parentLocations);
 
-  const labelsStore = useLabelStore();
-  const labels = computed(() => labelsStore.labels);
+  const tagsStore = useTagStore();
+  const tags = computed(() => tagsStore.tags);
 
   const itemTable = itemsTable(api);
   const stats = statCardData(api);
@@ -42,7 +50,7 @@
 
         <p v-if="itemTable.items.length === 0" class="ml-2 text-sm">{{ $t("items.no_results") }}</p>
         <BaseCard v-else-if="breakpoints.lg">
-          <ItemViewTable :items="itemTable.items" disable-controls />
+          <Table :items="itemTable.items" />
         </BaseCard>
         <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <ItemCard v-for="item in itemTable.items" :key="item.id" :item="item" />
@@ -58,10 +66,10 @@
       </section>
 
       <section>
-        <Subtitle> {{ $t("home.labels") }} </Subtitle>
-        <p v-if="labels.length === 0" class="ml-2 text-sm">{{ $t("labels.no_results") }}</p>
+        <Subtitle> {{ $t("home.tags") }} </Subtitle>
+        <p v-if="tags.length === 0" class="ml-2 text-sm">{{ $t("tags.no_results") }}</p>
         <div v-else class="flex flex-wrap gap-4">
-          <LabelChip v-for="label in labels" :key="label.id" size="lg" :label="label" class="shadow-md" />
+          <TagChip v-for="tag in tags" :key="tag.id" size="lg" :tag="tag" class="shadow-md" />
         </div>
       </section>
     </BaseContainer>

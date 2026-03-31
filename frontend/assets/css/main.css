@@ -957,8 +957,14 @@
   * {
     @apply border-border;
   }
-  body {
+  html, body {
     @apply bg-background text-foreground;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  body {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 }
 
@@ -1005,12 +1011,12 @@
 
 .markdown :where(ul) {
   list-style: disc;
-  margin-left: 2rem;
+  margin-left: 1rem;
 }
 
 .markdown :where(ol) {
   list-style: decimal;
-  margin-left: 2rem;
+  margin-left: 1rem;
 }
 /* Heading Styles */
 .markdown :where(h1) {
@@ -1046,4 +1052,32 @@
 :root {
   --header-height: 4rem;
   --header-height-mobile: 7rem;
+}
+
+/* Non-scoped styles for regular text */
+.break-all {
+  word-break: break-all;
+  max-width: 100%;
+}
+
+/* Handle very long words */
+pre,
+code,
+a,
+p,
+span,
+div,
+td,
+th,
+li,
+blockquote,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: auto;
 }

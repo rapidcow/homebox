@@ -5,6 +5,7 @@
   import { useLocationStore } from "~~/stores/locations";
   import MdiLoading from "~icons/mdi/loading";
   import MdiPackageVariant from "~icons/mdi/package-variant";
+  import MdiPlus from "~icons/mdi/plus";
   import MdiPencil from "~icons/mdi/pencil";
   import MdiDelete from "~icons/mdi/delete";
   import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,6 +22,17 @@
   import { Badge } from "@/components/ui/badge";
   import { Separator } from "@/components/ui/separator";
   import { DialogID } from "~/components/ui/dialog-provider/utils";
+  import FormTextField from "~/components/Form/TextField.vue";
+  import FormTextArea from "~/components/Form/TextArea.vue";
+  import LocationSelector from "~/components/Location/Selector.vue";
+  import BaseContainer from "@/components/Base/Container.vue";
+  import Currency from "~/components/global/Currency.vue";
+  import DateTime from "~/components/global/DateTime.vue";
+  import LabelMaker from "~/components/global/LabelMaker.vue";
+  import Markdown from "~/components/global/Markdown.vue";
+  import BaseSectionHeader from "@/components/Base/SectionHeader.vue";
+  import ItemViewSelectable from "~/components/Item/View/Selectable.vue";
+  import LocationCard from "~/components/Location/Card.vue";
 
   definePageMeta({
     middleware: ["auth"],
@@ -86,6 +98,10 @@
     openDialog(DialogID.UpdateLocation);
   }
 
+  function openCreateItem() {
+    openDialog(DialogID.CreateItem);
+  }
+
   async function update() {
     updating.value = true;
     updateData.parentId = parent.value?.id || null;
@@ -106,24 +122,31 @@
   const locationStore = useLocationStore();
   const locations = computed(() => locationStore.allLocations);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const parent = ref<LocationSummary | any>({});
 
-  const items = computedAsync(async () => {
-    if (!location.value) {
-      return [];
+  const { data: items, refresh: refreshItemList } = useAsyncData(
+    () => locationId.value + "_item_list",
+    async () => {
+      if (!locationId.value) {
+        return [];
+      }
+
+      const resp = await api.items.getAll({
+        locations: [locationId.value],
+      });
+
+      if (resp.error) {
+        toast.error(t("items.toast.failed_load_items"));
+        return [];
+      }
+
+      return resp.data.items;
+    },
+    {
+      watch: [locationId],
     }
-
-    const resp = await api.items.getAll({
-      locations: [location.value.id],
-    });
-
-    if (resp.error) {
-      toast.error(t("items.toast.failed_load_items"));
-      return [];
-    }
-
-    return resp.data.items;
-  });
+  );
 </script>
 
 <template>
@@ -199,25 +222,34 @@
                 </div>
               </div>
             </div>
-            <div class="ml-auto mt-2 flex flex-wrap items-center justify-between gap-3">
+            <div class="ml-auto mt-2 flex flex-wrap items-center justify-between gap-2">
               <LabelMaker :id="location.id" type="location" />
-              <Button @click="openUpdate">
-                <MdiPencil name="mdi-pencil" />
-                {{ $t("global.edit") }}
+              <Button class="w-9 md:w-auto" @click="openCreateItem">
+                <MdiPlus name="mdi-plus" />
+                <span class="hidden md:inline">
+                  {{ $t("components.item.create_modal.title") }}
+                </span>
               </Button>
-              <Button variant="destructive" @click="confirmDelete()">
+              <Button class="w-9 md:w-auto" @click="openUpdate">
+                <MdiPencil name="mdi-pencil" />
+                <span class="hidden md:inline">
+                  {{ $t("global.edit") }}
+                </span>
+              </Button>
+              <Button variant="destructive" class="w-9 md:w-auto" @click="confirmDelete()">
                 <MdiDelete name="mdi-delete" />
-                {{ $t("global.delete") }}
+                <span class="hidden md:inline">
+                  {{ $t("global.delete") }}
+                </span>
               </Button>
             </div>
           </div>
         </header>
         <Separator v-if="location && location.description" />
-        <Markdown v-if="location && location.description" class="mt-3 text-base" :source="location.description">
-        </Markdown>
+        <Markdown v-if="location && location.description" class="mt-3 text-base" :source="location.description" />
       </Card>
       <section v-if="location && items">
-        <ItemViewSelectable :items="items" />
+        <ItemViewSelectable :items="items" @refresh="refreshItemList" />
       </section>
 
       <section v-if="location && location.children.length > 0" class="mt-6">

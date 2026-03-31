@@ -17,6 +17,13 @@ export enum UserRole {
   RoleOwner = "owner",
 }
 
+export enum TemplatefieldType {
+  TypeText = "text",
+  TypeNumber = "number",
+  TypeBoolean = "boolean",
+  TypeTime = "time",
+}
+
 export enum MaintenanceFilterStatus {
   MaintenanceFilterStatusScheduled = "scheduled",
   MaintenanceFilterStatusCompleted = "completed",
@@ -54,6 +61,7 @@ export enum AttachmentType {
 
 export interface CurrenciesCurrency {
   code: string;
+  decimals: number;
   local: string;
   name: string;
   symbol: string;
@@ -153,14 +161,16 @@ export interface EntGroup {
 export interface EntGroupEdges {
   /** InvitationTokens holds the value of the invitation_tokens edge. */
   invitation_tokens: EntGroupInvitationToken[];
+  /** ItemTemplates holds the value of the item_templates edge. */
+  item_templates: EntItemTemplate[];
   /** Items holds the value of the items edge. */
   items: EntItem[];
-  /** Labels holds the value of the labels edge. */
-  labels: EntLabel[];
   /** Locations holds the value of the locations edge. */
   locations: EntLocation[];
   /** Notifiers holds the value of the notifiers edge. */
   notifiers: EntNotifier[];
+  /** Tags holds the value of the tags edge. */
+  tags: EntTag[];
   /** Users holds the value of the users edge. */
   users: EntUser[];
 }
@@ -257,14 +267,14 @@ export interface EntItemEdges {
   fields: EntItemField[];
   /** Group holds the value of the group edge. */
   group: EntGroup;
-  /** Label holds the value of the label edge. */
-  label: EntLabel[];
   /** Location holds the value of the location edge. */
   location: EntLocation;
   /** MaintenanceEntries holds the value of the maintenance_entries edge. */
   maintenance_entries: EntMaintenanceEntry[];
   /** Parent holds the value of the parent edge. */
   parent: EntItem;
+  /** Tag holds the value of the tag edge. */
+  tag: EntTag[];
 }
 
 export interface EntItemField {
@@ -300,31 +310,57 @@ export interface EntItemFieldEdges {
   item: EntItem;
 }
 
-export interface EntLabel {
-  /** Color holds the value of the "color" field. */
-  color: string;
+export interface EntItemTemplate {
   /** CreatedAt holds the value of the "created_at" field. */
   created_at: string;
+  /** Default description for items created from this template */
+  default_description: string;
+  /** DefaultInsured holds the value of the "default_insured" field. */
+  default_insured: boolean;
+  /** DefaultLifetimeWarranty holds the value of the "default_lifetime_warranty" field. */
+  default_lifetime_warranty: boolean;
+  /** DefaultManufacturer holds the value of the "default_manufacturer" field. */
+  default_manufacturer: string;
+  /** Default model number for items created from this template */
+  default_model_number: string;
+  /** Default name template for items (can use placeholders) */
+  default_name: string;
+  /** DefaultQuantity holds the value of the "default_quantity" field. */
+  default_quantity: number;
+  /** Default tag IDs for items created from this template */
+  default_tag_ids: string[];
+  /** DefaultWarrantyDetails holds the value of the "default_warranty_details" field. */
+  default_warranty_details: string;
   /** Description holds the value of the "description" field. */
   description: string;
   /**
    * Edges holds the relations/edges for other nodes in the graph.
-   * The values are being populated by the LabelQuery when eager-loading is set.
+   * The values are being populated by the ItemTemplateQuery when eager-loading is set.
    */
-  edges: EntLabelEdges;
+  edges: EntItemTemplateEdges;
   /** ID of the ent. */
   id: string;
+  /** Whether to include purchase fields in items created from this template */
+  include_purchase_fields: boolean;
+  /** Whether to include sold fields in items created from this template */
+  include_sold_fields: boolean;
+  /** Whether to include warranty fields in items created from this template */
+  include_warranty_fields: boolean;
   /** Name holds the value of the "name" field. */
   name: string;
+  /** Notes holds the value of the "notes" field. */
+  notes: string;
   /** UpdatedAt holds the value of the "updated_at" field. */
   updated_at: string;
 }
 
-export interface EntLabelEdges {
+export interface EntItemTemplateEdges {
+  /** Fields holds the value of the fields edge. */
+  fields: EntTemplateField[];
   /** Group holds the value of the group edge. */
   group: EntGroup;
-  /** Items holds the value of the items edge. */
-  items: EntItem[];
+  /** Location holds the value of the location edge. */
+  location: EntLocation;
 }
 
 export interface EntLocation {
@@ -416,11 +452,73 @@ export interface EntNotifierEdges {
   user: EntUser;
 }
 
+export interface EntTag {
+  /** Color holds the value of the "color" field. */
+  color: string;
+  /** CreatedAt holds the value of the "created_at" field. */
+  created_at: string;
+  /** Description holds the value of the "description" field. */
+  description: string;
+  /**
+   * Edges holds the relations/edges for other nodes in the graph.
+   * The values are being populated by the TagQuery when eager-loading is set.
+   */
+  edges: EntTagEdges;
+  /** ID of the ent. */
+  id: string;
+  /** Name holds the value of the "name" field. */
+  name: string;
+  /** UpdatedAt holds the value of the "updated_at" field. */
+  updated_at: string;
+}
+
+export interface EntTagEdges {
+  /** Group holds the value of the group edge. */
+  group: EntGroup;
+  /** Items holds the value of the items edge. */
+  items: EntItem[];
+}
+
+export interface EntTemplateField {
+  /** BooleanValue holds the value of the "boolean_value" field. */
+  boolean_value: boolean;
+  /** CreatedAt holds the value of the "created_at" field. */
+  created_at: string;
+  /** Description holds the value of the "description" field. */
+  description: string;
+  /**
+   * Edges holds the relations/edges for other nodes in the graph.
+   * The values are being populated by the TemplateFieldQuery when eager-loading is set.
+   */
+  edges: EntTemplateFieldEdges;
+  /** ID of the ent. */
+  id: string;
+  /** Name holds the value of the "name" field. */
+  name: string;
+  /** NumberValue holds the value of the "number_value" field. */
+  number_value: number;
+  /** TextValue holds the value of the "text_value" field. */
+  text_value: string;
+  /** TimeValue holds the value of the "time_value" field. */
+  time_value: string;
+  /** Type holds the value of the "type" field. */
+  type: TemplatefieldType;
+  /** UpdatedAt holds the value of the "updated_at" field. */
+  updated_at: string;
+}
+
+export interface EntTemplateFieldEdges {
+  /** ItemTemplate holds the value of the item_template edge. */
+  item_template: EntItemTemplate;
+}
+
 export interface EntUser {
   /** ActivatedOn holds the value of the "activated_on" field. */
   activated_on: string;
   /** CreatedAt holds the value of the "created_at" field. */
   created_at: string;
+  /** DefaultGroupID holds the value of the "default_group_id" field. */
+  default_group_id: string;
   /**
    * Edges holds the relations/edges for other nodes in the graph.
    * The values are being populated by the UserQuery when eager-loading is set.
@@ -434,6 +532,10 @@ export interface EntUser {
   is_superuser: boolean;
   /** Name holds the value of the "name" field. */
   name: string;
+  /** OidcIssuer holds the value of the "oidc_issuer" field. */
+  oidc_issuer: string;
+  /** OidcSubject holds the value of the "oidc_subject" field. */
+  oidc_subject: string;
   /** Role holds the value of the "role" field. */
   role: UserRole;
   /** Superuser holds the value of the "superuser" field. */
@@ -445,8 +547,8 @@ export interface EntUser {
 export interface EntUserEdges {
   /** AuthTokens holds the value of the auth_tokens edge. */
   auth_tokens: EntAuthTokens[];
-  /** Group holds the value of the group edge. */
-  group: EntGroup;
+  /** Groups holds the value of the groups edge. */
+  groups: EntGroup[];
   /** Notifiers holds the value of the notifiers edge. */
   notifiers: EntNotifier[];
 }
@@ -454,10 +556,6 @@ export interface EntUserEdges {
 export interface BarcodeProduct {
   barcode: string;
   imageBase64: string;
-  /**
-   * TODO: add image attachement
-   * TODO: add asin?
-   */
   imageURL: string;
   item: ItemCreate;
   manufacturer: string;
@@ -468,6 +566,13 @@ export interface BarcodeProduct {
   search_engine_name: string;
 }
 
+export interface DuplicateOptions {
+  copyAttachments: boolean;
+  copyCustomFields: boolean;
+  copyMaintenance: boolean;
+  copyPrefix: string;
+}
+
 export interface Group {
   createdAt: Date | string;
   currency: string;
@@ -476,11 +581,18 @@ export interface Group {
   updatedAt: Date | string;
 }
 
+export interface GroupInvitation {
+  expiresAt: Date | string;
+  group: Group;
+  id: string;
+  uses: number;
+}
+
 export interface GroupStatistics {
   totalItemPrice: number;
   totalItems: number;
-  totalLabels: number;
   totalLocations: number;
+  totalTags: number;
   totalUsers: number;
   totalWithWarranty: number;
 }
@@ -511,7 +623,6 @@ export interface ItemAttachmentUpdate {
 export interface ItemCreate {
   /** @maxLength 1000 */
   description: string;
-  labelIds: string[];
   /** Edges */
   locationId: string;
   /**
@@ -521,6 +632,7 @@ export interface ItemCreate {
   name: string;
   parentId?: string | null;
   quantity: number;
+  tagIds: string[];
 }
 
 export interface ItemField {
@@ -543,7 +655,6 @@ export interface ItemOut {
   id: string;
   imageId?: string | null;
   insured: boolean;
-  labels: LabelSummary[];
   /** Warranty */
   lifetimeWarranty: boolean;
   /** Edges */
@@ -566,6 +677,7 @@ export interface ItemOut {
   soldTime: Date | string;
   soldTo: string;
   syncChildItemsLocations: boolean;
+  tags: TagSummary[];
   thumbnailId?: string | null;
   updatedAt: Date | string;
   warrantyDetails: string;
@@ -574,7 +686,9 @@ export interface ItemOut {
 
 export interface ItemPatch {
   id: string;
+  locationId?: string | null;
   quantity?: number | null;
+  tagIds?: string[] | null;
 }
 
 export interface ItemPath {
@@ -592,7 +706,6 @@ export interface ItemSummary {
   id: string;
   imageId?: string | null;
   insured: boolean;
-  labels: LabelSummary[];
   /** Edges */
   location?: LocationSummary | null;
   name: string;
@@ -600,8 +713,115 @@ export interface ItemSummary {
   quantity: number;
   /** Sale details */
   soldTime: Date | string;
+  tags: TagSummary[];
   thumbnailId?: string | null;
   updatedAt: Date | string;
+}
+
+export interface ItemTemplateCreate {
+  /** @maxLength 1000 */
+  defaultDescription?: string | null;
+  defaultInsured: boolean;
+  defaultLifetimeWarranty: boolean;
+  /** Default location and tags */
+  defaultLocationId?: string | null;
+  /** @maxLength 255 */
+  defaultManufacturer?: string | null;
+  /** @maxLength 255 */
+  defaultModelNumber?: string | null;
+  /** @maxLength 255 */
+  defaultName?: string | null;
+  /** Default values for items */
+  defaultQuantity?: number | null;
+  defaultTagIds?: string[] | null;
+  /** @maxLength 1000 */
+  defaultWarrantyDetails?: string | null;
+  /** @maxLength 1000 */
+  description: string;
+  /** Custom fields */
+  fields: TemplateField[];
+  includePurchaseFields: boolean;
+  includeSoldFields: boolean;
+  /** Metadata flags */
+  includeWarrantyFields: boolean;
+  /**
+   * @minLength 1
+   * @maxLength 255
+   */
+  name: string;
+  /** @maxLength 1000 */
+  notes: string;
+}
+
+export interface ItemTemplateOut {
+  createdAt: Date | string;
+  defaultDescription: string;
+  defaultInsured: boolean;
+  defaultLifetimeWarranty: boolean;
+  /** Default location and tags */
+  defaultLocation: TemplateLocationSummary;
+  defaultManufacturer: string;
+  defaultModelNumber: string;
+  defaultName: string;
+  /** Default values for items */
+  defaultQuantity: number;
+  defaultTags: TemplateTagSummary[];
+  defaultWarrantyDetails: string;
+  description: string;
+  /** Custom fields */
+  fields: TemplateField[];
+  id: string;
+  includePurchaseFields: boolean;
+  includeSoldFields: boolean;
+  /** Metadata flags */
+  includeWarrantyFields: boolean;
+  name: string;
+  notes: string;
+  updatedAt: Date | string;
+}
+
+export interface ItemTemplateSummary {
+  createdAt: Date | string;
+  description: string;
+  id: string;
+  name: string;
+  updatedAt: Date | string;
+}
+
+export interface ItemTemplateUpdate {
+  /** @maxLength 1000 */
+  defaultDescription?: string | null;
+  defaultInsured: boolean;
+  defaultLifetimeWarranty: boolean;
+  /** Default location and tags */
+  defaultLocationId?: string | null;
+  /** @maxLength 255 */
+  defaultManufacturer?: string | null;
+  /** @maxLength 255 */
+  defaultModelNumber?: string | null;
+  /** @maxLength 255 */
+  defaultName?: string | null;
+  /** Default values for items */
+  defaultQuantity?: number | null;
+  defaultTagIds?: string[] | null;
+  /** @maxLength 1000 */
+  defaultWarrantyDetails?: string | null;
+  /** @maxLength 1000 */
+  description: string;
+  /** Custom fields */
+  fields: TemplateField[];
+  id: string;
+  includePurchaseFields: boolean;
+  includeSoldFields: boolean;
+  /** Metadata flags */
+  includeWarrantyFields: boolean;
+  /**
+   * @minLength 1
+   * @maxLength 255
+   */
+  name: string;
+  /** @maxLength 1000 */
+  notes: string;
 }
 
 export interface ItemUpdate {
@@ -612,7 +832,6 @@ export interface ItemUpdate {
   fields: ItemField[];
   id: string;
   insured: boolean;
-  labelIds: string[];
   /** Warranty */
   lifetimeWarranty: boolean;
   /** Edges */
@@ -642,37 +861,9 @@ export interface ItemUpdate {
   /** @maxLength 255 */
   soldTo: string;
   syncChildItemsLocations: boolean;
+  tagIds: string[];
   warrantyDetails: string;
   warrantyExpires: Date | string;
-}
-
-export interface LabelCreate {
-  color: string;
-  /** @maxLength 255 */
-  description: string;
-  /**
-   * @minLength 1
-   * @maxLength 255
-   */
-  name: string;
-}
-
-export interface LabelOut {
-  color: string;
-  createdAt: Date | string;
-  description: string;
-  id: string;
-  name: string;
-  updatedAt: Date | string;
-}
-
-export interface LabelSummary {
-  color: string;
-  createdAt: Date | string;
-  description: string;
-  id: string;
-  name: string;
-  updatedAt: Date | string;
 }
 
 export interface LocationCreate {
@@ -794,6 +985,52 @@ export interface PaginationResultItemSummary {
   total: number;
 }
 
+export interface TagCreate {
+  color: string;
+  /** @maxLength 1000 */
+  description: string;
+  /**
+   * @minLength 1
+   * @maxLength 255
+   */
+  name: string;
+}
+
+export interface TagOut {
+  color: string;
+  createdAt: Date | string;
+  description: string;
+  id: string;
+  name: string;
+  updatedAt: Date | string;
+}
+
+export interface TagSummary {
+  color: string;
+  createdAt: Date | string;
+  description: string;
+  id: string;
+  name: string;
+  updatedAt: Date | string;
+}
+
+export interface TemplateField {
+  id: string;
+  name: string;
+  textValue: string;
+  type: string;
+}
+
+export interface TemplateLocationSummary {
+  id: string;
+  name: string;
+}
+
+export interface TemplateTagSummary {
+  id: string;
+  name: string;
+}
+
 export interface TotalsByOrganizer {
   id: string;
   name: string;
@@ -808,12 +1045,21 @@ export interface TreeItem {
 }
 
 export interface UserOut {
+  defaultGroupId: string;
   email: string;
-  groupId: string;
-  groupName: string;
+  groupIds: string[];
   id: string;
   isOwner: boolean;
   isSuperuser: boolean;
+  name: string;
+  oidcIssuer: string;
+  oidcSubject: string;
+}
+
+export interface UserSummary {
+  email: string;
+  id: string;
+  isOwner: boolean;
   name: string;
 }
 
@@ -856,6 +1102,7 @@ export interface APISummary {
   labelPrinting: boolean;
   latest: Latest;
   message: string;
+  oidc: OIDCStatus;
   title: string;
   versions: string[];
 }
@@ -876,8 +1123,18 @@ export interface ChangePassword {
   new: string;
 }
 
+export interface CreateRequest {
+  name: string;
+}
+
+export interface GroupAcceptInvitationResponse {
+  id: string;
+  name: string;
+}
+
 export interface GroupInvitation {
   expiresAt: Date | string;
+  id: string;
   token: string;
   uses: number;
 }
@@ -891,8 +1148,25 @@ export interface GroupInvitationCreate {
   uses: number;
 }
 
+export interface GroupMemberAdd {
+  userId: string;
+}
+
 export interface ItemAttachmentToken {
   token: string;
+}
+
+export interface ItemTemplateCreateItemRequest {
+  /** @maxLength 1000 */
+  description: string;
+  locationId: string;
+  /**
+   * @minLength 1
+   * @maxLength 255
+   */
+  name: string;
+  quantity: number;
+  tagIds: string[];
 }
 
 export interface LoginForm {
@@ -903,10 +1177,23 @@ export interface LoginForm {
   username: string;
 }
 
+export interface OIDCStatus {
+  allowLocal: boolean;
+  autoRedirect: boolean;
+  buttonText: string;
+  enabled: boolean;
+}
+
 export interface TokenResponse {
   attachmentToken: string;
   expiresAt: Date | string;
   token: string;
+}
+
+export interface WipeInventoryOptions {
+  wipeLocations: boolean;
+  wipeMaintenance: boolean;
+  wipeTags: boolean;
 }
 
 export interface Wrapped {
