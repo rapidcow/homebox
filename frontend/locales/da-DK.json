@@ -401,7 +401,7 @@
         "follow_dev": "Følg udvikleren",
         "footer": {
             "api_link": "'<a href=\"https://homebox.software/en/api/\" target=\"_blank\">'API'</a>'",
-            "version_link": "'<'a href=\"{ gitwebURL }\"'>' Version: { version } Build: { build } '</a>'"
+            "version_link": "'<'a href=\"{ gitwebUrl }\"'>' Version: { version } Build: { build } '</a>'"
         },
         "github": "GitHub projekt",
         "insured": "Forsikret",

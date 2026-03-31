@@ -47,7 +47,7 @@ s!
 )
 !
 	$1
-	. q[\"] . "{ gitwebURL }"
+	. q[\"] . "{ gitwebUrl }"
 	. q[\"] . $2
 !ex
 ' ../frontend/locales/*.json
