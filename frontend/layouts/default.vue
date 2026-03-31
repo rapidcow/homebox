@@ -208,7 +208,7 @@
                     $t('global.footer.version_link', {
                       version: status.build.version.replace(/^v/, ''),
                       build: status.build.commit,
-		      gitwebUrl, status.build.gitwebUrl,
+                      gitwebUrl: status.build.gitwebUrl,
                     })
                   )
                 "
