@@ -32,8 +32,10 @@ BEGIN { $SQ = "'"'"'" }
 
 s!
 (
-	"version_link":[ ]"$SQ<$SQ a[ ]href=\\"
-)(?:
+	"version_link":[ ]"$SQ<$SQ a[ ]href=
+)
+	\\"
+(?:
 	https://github[.]com/sysadminsmedia/homebox/
 	releases/tag/v{[ ]version[ ]}
 |
@@ -45,7 +47,7 @@ s!
 )
 !
 	$1
-	. "{ gitwebURL }"
-	. $2
+	. q["] . "{ gitwebURL }"
+	. q["] . $2
 !ex
 ' ../frontend/locales/*.json
